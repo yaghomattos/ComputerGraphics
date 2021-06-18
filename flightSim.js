@@ -4,8 +4,11 @@ import KeyboardState from '../libs/util/KeyboardState.js';
 import {initRenderer, 
         InfoBox,
         createGroundPlaneWired,
+        initDefaultBasicLight,
         onWindowResize, 
         degreesToRadians} from "../libs/util/util.js";
+
+import { gerarAviao } from './airplane.js';
 
 
 var scene = new THREE.Scene();    // Create main scene
@@ -16,15 +19,15 @@ var renderer = initRenderer();    // View function in util/utils
 var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 /* sets the position of the camera at the backward of the plane */
-camera.position.set(0.0, 20.0, 0.0); 
+camera.position.set(0.0, 30.0, 0.0); 
 camera.lookAt(0.0, 0.0, 0.0);
-camera.up.set(0.0, 0.0, 0.0); 
+camera.up.set(0.0, 1.0, 0.0);
+camera.rotateX(degreesToRadians(-10));
 
 /**
  * simple light 
  */
-var light =  new THREE.HemisphereLight();
-scene.add(light);
+initDefaultBasicLight(scene);
 
 // Listen window size changes
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
@@ -33,7 +36,7 @@ window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)},
  * wireframe plan
  */
 var groundPlane = createGroundPlaneWired(500, 500);
-groundPlane.rotateX(degreesToRadians(-90));
+groundPlane.rotateX(degreesToRadians(90));
 scene.add(groundPlane);
 
 
@@ -44,14 +47,13 @@ var axesHelper = new THREE.AxesHelper(20);
 scene.add( axesHelper );
 
 /**
- * Airplane, famous flying cube
+ * Airplane
  */
-var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
-var cubeMaterial = new THREE.MeshNormalMaterial();
-var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-cube.position.set(0.0, 0.0, 3.0);
-cube.rotateX(0.2);
-scene.add(cube);
+var aviao = gerarAviao();
+aviao.rotateY(degreesToRadians(180));
+aviao.rotateZ(degreesToRadians(180));
+aviao.translateZ(-5);
+scene.add(aviao);
 
 /**
  * display information on screen
@@ -68,10 +70,11 @@ var keyboard = new KeyboardState();
  * simple object to controll camera
  */
 var cameraHolder = new THREE.Object3D();
-cameraHolder.position.set(0, 0, -10)
+cameraHolder.position.set(0, 0, 10)
+cameraHolder.rotateY(degreesToRadians(180));
 scene.add(cameraHolder);
 cameraHolder.add(camera);
-cameraHolder.add(cube);
+cameraHolder.add(aviao);
 
 render();
 
