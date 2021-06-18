@@ -82,7 +82,7 @@ const speed = 1.0; /* sets the initial speed */
 let cont = 0.8; /* sets initial speed multiplication */
 let verify = false; /* movement check */
 
-var angle = degreesToRadians(2); 
+var angle = degreesToRadians(0.8); 
 
 async function keyboardUpdate() {
 
@@ -101,8 +101,8 @@ async function keyboardUpdate() {
     cont -= 0.05; 
   }
 
-  if( keyboard.pressed("up") )  cameraHolder.rotateX( angle );
-  if ( keyboard.pressed("down") )  cameraHolder.rotateX( -angle );
+  if( keyboard.pressed("up") )  cameraHolder.rotateX( -angle );
+  if ( keyboard.pressed("down") )  cameraHolder.rotateX( angle );
 
   if ( keyboard.pressed("left") )  cameraHolder.rotateZ( -angle );
   if ( keyboard.pressed("right") )  cameraHolder.rotateZ( angle );
