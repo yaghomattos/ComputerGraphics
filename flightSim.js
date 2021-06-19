@@ -1,12 +1,12 @@
-import * as THREE from  '../build/three.module.js';
-import Stats from       '../build/jsm/libs/stats.module.js';
-import KeyboardState from '../libs/util/KeyboardState.js';
+import * as THREE from  '../../build/three.module.js';
+import Stats from  '../../build/jsm/libs/stats.module.js';
+import KeyboardState from '../../libs/util/KeyboardState.js';
 import {initRenderer, 
         InfoBox,
         createGroundPlaneWired,
         initDefaultBasicLight,
         onWindowResize, 
-        degreesToRadians} from "../libs/util/util.js";
+        degreesToRadians} from "../../libs/util/util.js";
 
 import { gerarAviao } from './airplane.js';
 
@@ -35,16 +35,15 @@ window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)},
 /**
  * wireframe plan
  */
-var groundPlane = createGroundPlaneWired(500, 500);
+var groundPlane = createGroundPlaneWired(2000, 2000);
 groundPlane.rotateX(degreesToRadians(90));
 scene.add(groundPlane);
-
 
 /**
  * axis for reference
  */
 var axesHelper = new THREE.AxesHelper(20);
-scene.add( axesHelper );
+scene.add(axesHelper);
 
 /**
  * Airplane
@@ -64,7 +63,6 @@ showInformation();
  * get keyboard data
  */
 var keyboard = new KeyboardState();
-
 
 /**
  * simple object to controll camera
@@ -88,8 +86,13 @@ async function keyboardUpdate() {
 
   keyboard.update();
 
-  if ( keyboard.pressed("space") ) {
+  if ( keyboard.pressed("enter") ) {
     verify = !verify;
+  }
+  
+  if ( keyboard.pressed("space") ) {
+      groundPlane.visible = !groundPlane.visible;
+      axesHelper.visible = !axesHelper.visible;
   }
 
   if(verify) cameraHolder.translateY(-speed * cont);
@@ -107,8 +110,8 @@ async function keyboardUpdate() {
   if ( keyboard.pressed("left") )  cameraHolder.rotateZ( -angle );
   if ( keyboard.pressed("right") )  cameraHolder.rotateZ( angle );
 
-  if ( keyboard.pressed(",") )  cameraHolder.rotateY( angle );
-  if ( keyboard.pressed(".") )  cameraHolder.rotateY( -angle );
+  if ( keyboard.pressed(",") )  aviao.rotateY( angle );
+  if ( keyboard.pressed(".") )  aviao.rotateY( -angle );
 }
 
 function showInformation()
@@ -117,7 +120,8 @@ function showInformation()
   var controls = new InfoBox();
     controls.add("Controls");
     controls.addParagraph();
-    controls.add("Space to start move")
+    controls.add("Enter to start moving")
+    controls.add("Space to change camera mode")
     controls.add("Q to speed up");
     controls.add("A to speed down");
     controls.add("Up arrow to 'Picar'");
