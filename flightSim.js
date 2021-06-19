@@ -1,6 +1,6 @@
-import * as THREE from  '../../build/three.module.js';
-import Stats from  '../../build/jsm/libs/stats.module.js';
-import KeyboardState from '../../libs/util/KeyboardState.js';
+import * as THREE from  '../build/three.module.js';
+import Stats from  '../build/jsm/libs/stats.module.js';
+import KeyboardState from '../libs/util/KeyboardState.js';
 import {initRenderer, 
         InfoBox,
         createGroundPlaneWired,
