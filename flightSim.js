@@ -86,11 +86,11 @@ async function keyboardUpdate() {
 
   keyboard.update();
 
-  if ( keyboard.pressed("enter") ) {
+  if ( keyboard.down("enter") ) {
     verification = !verification;
   }
   
-  if ( keyboard.pressed("space") ) {
+  if ( keyboard.down("space") ) {
       groundPlane.visible = !groundPlane.visible;
       axesHelper.visible = !axesHelper.visible;
   }
