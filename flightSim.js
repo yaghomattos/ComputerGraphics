@@ -6,7 +6,7 @@ import {initRenderer,
         createGroundPlaneWired,
         initDefaultBasicLight,
         onWindowResize, 
-        degreesToRadians} from "../../libs/util/util.js";
+        degreesToRadians} from '../libs/util/util.js';
 
 import { gerarAviao } from './airplane.js';
 
@@ -77,8 +77,8 @@ cameraHolder.add(aviao);
 render();
 
 const speed = 1.0; /* sets the initial speed */
-let cont = 0.8; /* sets initial speed multiplication */
-let verify = false; /* movement check */
+let mult = 0.8; /* sets initial speed multiplication */
+let verification = false; /* movement check */
 
 var angle = degreesToRadians(0.8); 
 
@@ -87,7 +87,7 @@ async function keyboardUpdate() {
   keyboard.update();
 
   if ( keyboard.pressed("enter") ) {
-    verify = !verify;
+    verification = !verification;
   }
   
   if ( keyboard.pressed("space") ) {
@@ -95,20 +95,20 @@ async function keyboardUpdate() {
       axesHelper.visible = !axesHelper.visible;
   }
 
-  if(verify) cameraHolder.translateY(-speed * cont);
+  if(verification) cameraHolder.translateY(-speed * mult);
 
-  if ( keyboard.pressed("Q") && cont <= 8)  {
-    cont += 0.05;
+  if ( keyboard.pressed("Q") && mult <= 8)  {
+    mult += 0.05;
   }
-  if ( keyboard.pressed("A") && cont > 0.5)  { 
-    cont -= 0.05; 
+  if ( keyboard.pressed("A") && mult > 0.5)  { 
+    mult -= 0.05; 
   }
 
-  if( keyboard.pressed("up") )  cameraHolder.rotateX( -angle );
-  if ( keyboard.pressed("down") )  cameraHolder.rotateX( angle );
+  if( keyboard.pressed("up") )  aviao.rotateX( -angle );
+  if ( keyboard.pressed("down") )  aviao.rotateX( angle );
 
-  if ( keyboard.pressed("left") )  cameraHolder.rotateZ( -angle );
-  if ( keyboard.pressed("right") )  cameraHolder.rotateZ( angle );
+  if ( keyboard.pressed("left") )  aviao.rotateZ( -angle );
+  if ( keyboard.pressed("right") )  aviao.rotateZ( angle );
 
   if ( keyboard.pressed(",") )  aviao.rotateY( angle );
   if ( keyboard.pressed(".") )  aviao.rotateY( -angle );
@@ -124,10 +124,9 @@ function showInformation()
     controls.add("Space to change camera mode")
     controls.add("Q to speed up");
     controls.add("A to speed down");
-    controls.add("Up arrow to 'Picar'");
-    controls.add("Down arrow to 'Cabrar'");
-    controls.add("Left / Right arrow para o leme");
-    controls.add(", or < / . or > para aileron")
+    controls.add("Up/Down arrow to elevator");
+    controls.add("Left / Right arrow to rudder");
+    controls.add(", or < / . or > to aileron")
     controls.show();
 }
 
