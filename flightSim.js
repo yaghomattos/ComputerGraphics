@@ -95,7 +95,7 @@ async function keyboardUpdate() {
       axesHelper.visible = !axesHelper.visible;
   }
 
-  if(verification) cameraHolder.translateY(-speed * mult);
+  if(verification) aviao.translateY(speed * mult);
 
   if ( keyboard.pressed("Q") && mult <= 8)  {
     mult += 0.05;
