@@ -20,10 +20,9 @@ var renderer = initRenderer();    // View function in util/utils
 var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 /* sets the position of the camera at the backward of the plane */
-camera.position.set(0.0, 30.0, 10.0); 
+camera.position.set(0.0, -30.0, 25.0); 
 camera.lookAt(0.0, 0.0, 0.0);
 camera.up.set(0.0, 1.0, 0.0);
-//camera.rotateX(degreesToRadians(-10));
 
 var trackballControls = new TrackballControls( camera, renderer.domElement );
 
@@ -53,7 +52,7 @@ scene.add(axesHelper);
  */
 var aviao = gerarAviao();
 //aviao.rotateY(degreesToRadians(180));
-aviao.rotateZ(degreesToRadians(180));
+//aviao.rotateZ(degreesToRadians(180));
 aviao.translateZ(5);
 scene.add(aviao);
 
@@ -72,10 +71,10 @@ var keyboard = new KeyboardState();
  */
 var cameraHolder = new THREE.Object3D();
 cameraHolder.position.set(0, 0, 0)
-//cameraHolder.rotateY(degreesToRadians(180));
+cameraHolder.rotateX(degreesToRadians(20));
 scene.add(cameraHolder);
 cameraHolder.add(camera);
-cameraHolder.add(aviao);
+//cameraHolder.add(aviao);
 
 render();
 
