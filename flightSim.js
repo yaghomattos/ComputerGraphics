@@ -51,8 +51,6 @@ scene.add(axesHelper);
  * Airplane
  */
 var aviao = gerarAviao();
-//aviao.rotateY(degreesToRadians(180));
-//aviao.rotateZ(degreesToRadians(180));
 aviao.translateZ(2);
 scene.add(aviao);
 
@@ -71,7 +69,6 @@ var keyboard = new KeyboardState();
  */
 var cameraHolder = new THREE.Object3D();
 cameraHolder.position.set(0, 0, 0);
-//cameraHolder.rotateX(degreesToRadians(20));
 scene.add(cameraHolder);
 cameraHolder.add(camera);
 cameraHolder.add(aviao);
@@ -83,6 +80,7 @@ let mult = 0.8; /* sets initial speed multiplication */
 var verification = false; /* movement check */
 
 var angle = degreesToRadians(0.4); 
+var pos = new THREE.Vector3(0, 0, 0);
 
 async function keyboardUpdate() {
 
@@ -93,8 +91,20 @@ async function keyboardUpdate() {
   }
   
   if ( keyboard.down("space") ) {
-      groundPlane.visible = !groundPlane.visible;
-      axesHelper.visible = !axesHelper.visible;
+    groundPlane.visible = !groundPlane.visible;
+    axesHelper.visible = !axesHelper.visible;
+
+    pos = cameraHolder.position;
+    console.log(pos);
+    if(groundPlane.visible) {
+      cameraHolder.position.set = pos;
+      camera.position.set = (pos + (0.0, -30.0, 10.0));
+    }
+    else {
+      aviao.position.set = (0, 0, 0);
+      cameraHolder.position.set = (0, 0, 0);
+      camera.position.set = (0, 0, 0);
+    }  
   }
 
   if(verification) cameraHolder.translateY(speed * mult);
