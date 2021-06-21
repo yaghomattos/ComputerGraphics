@@ -112,6 +112,7 @@ function gerarLeme() {
   leme.rotateX(Math.PI);
   leme.rotateY(Math.PI/2);
   leme.translateY(9);
+  leme.translateZ(-0.1);
 
   return leme;
 
