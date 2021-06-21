@@ -20,7 +20,7 @@ var renderer = initRenderer();    // View function in util/utils
 var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 /* sets the position of the camera at the backward of the plane */
-camera.position.set(0.0, -30.0, 25.0); 
+camera.position.set(0.0, -30.0, 10.0);
 camera.lookAt(0.0, 0.0, 0.0);
 camera.up.set(0.0, 1.0, 0.0);
 
@@ -53,7 +53,7 @@ scene.add(axesHelper);
 var aviao = gerarAviao();
 //aviao.rotateY(degreesToRadians(180));
 //aviao.rotateZ(degreesToRadians(180));
-aviao.translateZ(5);
+aviao.translateZ(2);
 scene.add(aviao);
 
 /**
@@ -70,11 +70,11 @@ var keyboard = new KeyboardState();
  * simple object to controll camera
  */
 var cameraHolder = new THREE.Object3D();
-cameraHolder.position.set(0, 0, 0)
-cameraHolder.rotateX(degreesToRadians(20));
+cameraHolder.position.set(0, 0, 0);
+//cameraHolder.rotateX(degreesToRadians(20));
 scene.add(cameraHolder);
 cameraHolder.add(camera);
-//cameraHolder.add(aviao);
+cameraHolder.add(aviao);
 
 render();
 
@@ -106,22 +106,34 @@ async function keyboardUpdate() {
     mult -= 0.05; 
   }
 
-  if( keyboard.pressed("up") )  aviao.rotateX( -angle );
-  if ( keyboard.pressed("down") )  aviao.rotateX( angle );
+  if (keyboard.pressed('up')) cameraHolder.rotateX(angle);
+  if (keyboard.down('up')) aviao.rotateX(degreesToRadians(45));
+  if (keyboard.up('up')) aviao.rotateX(degreesToRadians(-45));
+  if (keyboard.pressed('down')) cameraHolder.rotateX(-angle);
+  if (keyboard.down('down')) aviao.rotateX(degreesToRadians(-45));
+  if (keyboard.up('down')) aviao.rotateX(degreesToRadians(45));
 
-  if ( keyboard.pressed("left") )  aviao.rotateZ( -angle );
-  if ( keyboard.pressed("right") )  aviao.rotateZ( angle );
+  if (keyboard.pressed('left')) cameraHolder.rotateZ(angle);
+  if (keyboard.down('left')) aviao.rotateZ(degreesToRadians(45));
+  if (keyboard.up('left')) aviao.rotateZ(degreesToRadians(-45));
+  if (keyboard.pressed('right')) cameraHolder.rotateZ(-angle);
+  if (keyboard.down('right')) aviao.rotateZ(degreesToRadians(-45));
+  if (keyboard.up('right')) aviao.rotateZ(degreesToRadians(45));
 
-  if ( keyboard.pressed(",") )  aviao.rotateY( angle );
-  if ( keyboard.pressed(".") )  aviao.rotateY( -angle );
+  if (keyboard.pressed(',')) cameraHolder.rotateY(-angle);
+  if (keyboard.down(',')) aviao.rotateY(degreesToRadians(-45));
+  if (keyboard.up(',')) aviao.rotateY(degreesToRadians(45));
+  if (keyboard.pressed('.')) cameraHolder.rotateY(angle);
+  if (keyboard.down('.')) aviao.rotateY(degreesToRadians(45));
+  if (keyboard.up('.')) aviao.rotateY(degreesToRadians(-45));
 }
 
 function showInformation()
 {
   // Use this to show information onscreen
   var controls = new InfoBox();
-    controls.add("Controls");
-    controls.addParagraph();
+  controls.add('Controls');
+  controls.addParagraph();
     controls.add("Enter to start moving")
     controls.add("Space to change camera mode")
     controls.add("Q to speed up");
@@ -135,8 +147,13 @@ function showInformation()
 function render()
 {
   stats.update(); // Update FPS
-  trackballControls.update();
   keyboardUpdate();
   requestAnimationFrame(render); // Show events
-  renderer.render(scene, camera) // Render scene
+  if (groundPlane.visible) {
+    trackballControls.enabled = false;
+  } else {
+    trackballControls.enabled = true;
+    trackballControls.update();
+  }
+  renderer.render(scene, camera); // Render scene
 }
