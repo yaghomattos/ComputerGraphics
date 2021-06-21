@@ -18,10 +18,10 @@ var renderer = initRenderer();    // View function in util/utils
   renderer.setClearColor("rgb(30, 30, 40)");
 
 var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+var aux = new THREE.Object3D();
 
 /* sets the position of the camera at the backward of the plane */
-camera.position.set(0.0, -30.0, 10.0);
-camera.lookAt(0.0, 0.0, 0.0);
+camera.position.set(0.0, -50.0, 15.0);
 camera.up.set(0.0, 1.0, 0.0);
 
 var trackballControls = new TrackballControls( camera, renderer.domElement );
@@ -81,6 +81,9 @@ render();
 const speed = 1.0; /* sets the initial speed */
 let mult = 0.8; /* sets initial speed multiplication */
 var verification = false; /* movement check */
+let angleHelperX = 0;
+let angleHelperY = 0;
+let angularSpeed = Math.PI*0.005;
 
 var angle = degreesToRadians(0.8); 
 
@@ -93,11 +96,13 @@ async function keyboardUpdate() {
   }
   
   if ( keyboard.down("space") ) {
+      if (groundPlane.visible) aux.copy(cameraHolder, true);
+      if (!groundPlane.visible) cameraHolder.copy(aux, true);
       groundPlane.visible = !groundPlane.visible;
       axesHelper.visible = !axesHelper.visible;
   }
 
-  if(verification) aviao.translateY(speed * mult);
+  if(verification) cameraHolder.translateY(speed * mult);
 
   if ( keyboard.pressed("Q") && mult <= 8)  {
     mult += 0.05;
@@ -106,19 +111,65 @@ async function keyboardUpdate() {
     mult -= 0.05; 
   }
 
+
+  /*
   if (keyboard.pressed('up')) cameraHolder.rotateX(angle);
   if (keyboard.down('up')) aviao.rotateX(degreesToRadians(45));
   if (keyboard.up('up')) aviao.rotateX(degreesToRadians(-45));
-  if (keyboard.pressed('down')) cameraHolder.rotateX(-angle);
+  
+
+  if (keyboard.pressed('down')) cameraHolder.rotateX(-angle); 
   if (keyboard.down('down')) aviao.rotateX(degreesToRadians(-45));
   if (keyboard.up('down')) aviao.rotateX(degreesToRadians(45));
+  */
+  
+  if (keyboard.pressed('down') && angleHelperX <= Math.PI/4 ) {
+    cameraHolder.rotateX(angularSpeed);
+    angleHelperX += angularSpeed;
+    }
+  else if (keyboard.pressed('up') && angleHelperX >= -Math.PI/4 ) {
+      cameraHolder.rotateX(-angularSpeed);
+      angleHelperX -= angularSpeed;
+    }
 
+  /*
   if (keyboard.pressed('left')) cameraHolder.rotateZ(angle);
   if (keyboard.down('left')) aviao.rotateZ(degreesToRadians(45));
   if (keyboard.up('left')) aviao.rotateZ(degreesToRadians(-45));
+
   if (keyboard.pressed('right')) cameraHolder.rotateZ(-angle);
   if (keyboard.down('right')) aviao.rotateZ(degreesToRadians(-45));
   if (keyboard.up('right')) aviao.rotateZ(degreesToRadians(45));
+  */
+
+  if (keyboard.pressed('left')) {
+    cameraHolder.rotateZ(angle);
+    cameraHolder.rotateZ(angle);
+    
+    if (angleHelperY >= degreesToRadians(-30)) {
+      aviao.rotateY(-4*angularSpeed);
+      angleHelperY -= 4*angularSpeed;
+    }
+  }
+  else if (keyboard.pressed('right')) {
+    cameraHolder.rotateZ(-angle);
+    cameraHolder.rotateZ(-angle);
+    
+    if (angleHelperY <= degreesToRadians(30)) {
+      aviao.rotateY(4*angularSpeed);
+      angleHelperY += 4*angularSpeed;
+      }
+    }
+  else {
+    if (angleHelperY > 0) {
+      aviao.rotateY(-4*angularSpeed);
+      angleHelperY -= 4*angularSpeed;
+    }
+    if (angleHelperY < 0) {
+      aviao.rotateY(4*angularSpeed);
+      angleHelperY += 4*angularSpeed;
+    }
+  }
 
   if (keyboard.pressed(',')) cameraHolder.rotateY(-angle);
   if (keyboard.down(',')) aviao.rotateY(degreesToRadians(-45));
@@ -151,6 +202,7 @@ function render()
   requestAnimationFrame(render); // Show events
   if (groundPlane.visible) {
     trackballControls.enabled = false;
+
   } else {
     trackballControls.enabled = true;
     trackballControls.update();
