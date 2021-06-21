@@ -82,7 +82,7 @@ const speed = 1.0; /* sets the initial speed */
 let mult = 0.8; /* sets initial speed multiplication */
 var verification = false; /* movement check */
 
-var angle = degreesToRadians(0.8); 
+var angle = degreesToRadians(0.4); 
 
 async function keyboardUpdate() {
 
@@ -111,32 +111,25 @@ async function keyboardUpdate() {
 
   if (keyboard.pressed('left')) cameraHolder.rotateZ(angle);
   if (keyboard.pressed('right')) cameraHolder.rotateZ(-angle);
-
-  /* unnecessary */
-  if (keyboard.pressed(',')) cameraHolder.rotateY(-angle);
-  if (keyboard.down(',')) aviao.rotateY(degreesToRadians(-45));
-  if (keyboard.up(',')) aviao.rotateY(degreesToRadians(45));
-  if (keyboard.pressed('.')) cameraHolder.rotateY(angle);
-  if (keyboard.down('.')) aviao.rotateY(degreesToRadians(45));
-  if (keyboard.up('.')) aviao.rotateY(degreesToRadians(-45));
 }
 
 function moveAileronRight() {
   if(aviao.rotation.y <= degreesToRadians(45)) {
-    aviao.rotation.y += degreesToRadians(.5); 
+    aviao.rotation.y += degreesToRadians(1); 
   }  
 }
 function moveAileronLeft() {
   if(aviao.rotation.y >= degreesToRadians(-45)) {
-    aviao.rotation.y += degreesToRadians(-.5); 
+    aviao.rotation.y += degreesToRadians(-1); 
   }  
 }
 function returnAileron() {
-  if(aviao.rotation.y != degreesToRadians(0))
+  if(aviao.rotation.y != degreesToRadians(0)) {
     if(aviao.rotation.y > degreesToRadians(0))
-      aviao.rotation.y += degreesToRadians(-1);
+      aviao.rotation.y = degreesToRadians(-0);
     else
-      aviao.rotation.y += degreesToRadians(1);  
+      aviao.rotation.y = degreesToRadians(0);  
+  }    
 }
 
 function moveElevatorUp() {
@@ -149,7 +142,14 @@ function moveElevatorDown() {
     aviao.rotation.x += degreesToRadians(-.5);  
   }  
 }
-function returnElevator() {}
+function returnElevator() {
+  if(aviao.rotation.x != degreesToRadians(0)) {
+    if(aviao.rotation.x > degreesToRadians(0))
+      aviao.rotation.x = degreesToRadians(-0);
+    else
+      aviao.rotation.x = degreesToRadians(0);  
+  } 
+}
 
 function showInformation()
 {
@@ -162,8 +162,7 @@ function showInformation()
     controls.add("Q to speed up");
     controls.add("A to speed down");
     controls.add("Up/Down arrow to elevator");
-    controls.add("Left / Right arrow to rudder");
-    controls.add(", or < / . or > to aileron")
+    controls.add("Left / Right arrow to turn");
     controls.show();
 }
 
@@ -171,11 +170,13 @@ function render()
 {
   stats.update(); // Update FPS
   keyboardUpdate();
-  if (keyboard.pressed('right')) moveAileronRight();
-  if (keyboard.pressed('left')) moveAileronLeft();
-  //returnAileron(); 
+
+  if(keyboard.pressed('right')) moveAileronRight();
+  if(keyboard.pressed('left')) moveAileronLeft();
+  if(keyboard.up('left') || keyboard.up('right')) returnAileron(); 
   if(keyboard.pressed('up')) moveElevatorDown();
   if(keyboard.pressed('down')) moveElevatorUp();
+  if(keyboard.up('up') || keyboard.up('down')) returnElevator(); 
   
   requestAnimationFrame(render); // Show events
   if (groundPlane.visible) {
