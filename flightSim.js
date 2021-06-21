@@ -18,7 +18,6 @@ var renderer = initRenderer();    // View function in util/utils
   renderer.setClearColor("rgb(30, 30, 40)");
 
 var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-var aux = new THREE.Object3D();
 
 /* sets the position of the camera at the backward of the plane */
 camera.position.set(0.0, -50.0, 15.0);
@@ -96,8 +95,6 @@ async function keyboardUpdate() {
   }
   
   if ( keyboard.down("space") ) {
-      if (groundPlane.visible) aux.copy(cameraHolder, true);
-      if (!groundPlane.visible) cameraHolder.copy(aux, true);
       groundPlane.visible = !groundPlane.visible;
       axesHelper.visible = !axesHelper.visible;
   }
