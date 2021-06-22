@@ -48,7 +48,7 @@ var axesHelper = new THREE.AxesHelper(20);
 scene.add(axesHelper);
 
 /**
- * Airplane
+ * airplane
  */
 var aviao = gerarAviao();
 aviao.translateZ(2);
@@ -79,8 +79,7 @@ const speed = 1.0; /* sets the initial speed */
 let mult = 0.8; /* sets initial speed multiplication */
 var verification = false; /* movement check */
 
-var angle = degreesToRadians(0.4); 
-var pos = new THREE.Vector3(0, 0, 0);
+var angle = degreesToRadians(0.4); /* rotation angle*/
 
 async function keyboardUpdate() {
 
@@ -93,6 +92,9 @@ async function keyboardUpdate() {
   if ( keyboard.down("space") ) {
     groundPlane.visible = !groundPlane.visible;
     axesHelper.visible = !axesHelper.visible;
+    if(groundPlane.visible) {
+      location.reload();
+    }  
   }
 
   if(verification) cameraHolder.translateY(speed * mult);
@@ -168,6 +170,7 @@ function render()
   keyboardUpdate();
   requestAnimationFrame(render); // Show events
   renderer.render(scene, camera); // Render scene
+
   if (groundPlane.visible) {
     trackballControls.enabled = false;
   } else {
