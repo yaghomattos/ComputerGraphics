@@ -27,7 +27,6 @@ function gerarCauda(){
   var cauda = new THREE.Object3D();
   var seg = 0.1, factor = 0.9997, aux1 = 1, aux2;
 
-//  for (var i = 0; i < 5; i++){
   var count = 0;
   for (var i = 0; aux1 > 0.3; i++){
 
@@ -42,7 +41,6 @@ function gerarCauda(){
     aux1 = aux2;
     count++;
   }
-  console.log("cauda: " + count);
   return cauda;
 }
 
@@ -50,7 +48,6 @@ function gerarCabine(){
   var cabine = new THREE.Object3D();
   var seg = 0.06, factor = 0.997, aux1 = 1, aux2;
 
-//  for (var i = 0; i < 5; i++){
   var count = 0;
   for (var i = 0; aux1 > 0.5; i++){
 
@@ -66,7 +63,6 @@ function gerarCabine(){
     aux1 = aux2;
     count++;
   }
-  console.log("cabine: " + count);
 
   var curva = [];
 
@@ -79,12 +75,11 @@ function gerarCabine(){
 
   var bicoGeometry = new THREE.LatheGeometry(curva, 32);
 
-  //  var bicoGeometry = new THREE.SphereGeometry(aux2, 32, 32);
-    var bicoMaterial = new THREE.MeshPhongMaterial();
-    var bico = new THREE.Mesh(bicoGeometry, bicoMaterial);
-    bico.translateY((5+count*seg));
+  var bicoMaterial = new THREE.MeshPhongMaterial();
+  var bico = new THREE.Mesh(bicoGeometry, bicoMaterial);
+  bico.translateY((5+count*seg));
 
-    cabine.add(bico);
+  cabine.add(bico);
    
   return cabine;
 }
