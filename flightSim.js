@@ -93,18 +93,6 @@ async function keyboardUpdate() {
   if ( keyboard.down("space") ) {
     groundPlane.visible = !groundPlane.visible;
     axesHelper.visible = !axesHelper.visible;
-
-    pos = cameraHolder.position;
-    console.log(pos);
-    if(groundPlane.visible) {
-      cameraHolder.position.set = pos;
-      camera.position.set = (pos + (0.0, -30.0, 10.0));
-    }
-    else {
-      aviao.position.set = (0, 0, 0);
-      cameraHolder.position.set = (0, 0, 0);
-      camera.position.set = (0, 0, 0);
-    }  
   }
 
   if(verification) cameraHolder.translateY(speed * mult);
@@ -116,50 +104,48 @@ async function keyboardUpdate() {
     mult -= 0.05; 
   }
 
-  if (keyboard.pressed('up')) cameraHolder.rotateX(-angle);
-  if (keyboard.pressed('down')) cameraHolder.rotateX(angle);
-
-  if (keyboard.pressed('left')) cameraHolder.rotateZ(angle);
-  if (keyboard.pressed('right')) cameraHolder.rotateZ(-angle);
-}
-
-function moveAileronRight() {
-  if(aviao.rotation.y <= degreesToRadians(45)) {
-    aviao.rotation.y += degreesToRadians(1); 
+  if (keyboard.pressed('up')) {
+    cameraHolder.rotateX(-angle);
+    if(aviao.rotation.x >= degreesToRadians(-20)) {
+      aviao.rotation.x += degreesToRadians(-1);  
+    }    
   }  
-}
-function moveAileronLeft() {
-  if(aviao.rotation.y >= degreesToRadians(-45)) {
-    aviao.rotation.y += degreesToRadians(-1); 
-  }  
-}
-function returnAileron() {
-  if(aviao.rotation.y != degreesToRadians(0)) {
-    if(aviao.rotation.y > degreesToRadians(0))
-      aviao.rotation.y = degreesToRadians(-0);
-    else
-      aviao.rotation.y = degreesToRadians(0);  
-  }    
-}
-
-function moveElevatorUp() {
-  if(aviao.rotation.x <= degreesToRadians(20)) {
-    aviao.rotation.x += degreesToRadians(.5);  
-  }  
-}
-function moveElevatorDown() {
-  if(aviao.rotation.x >= degreesToRadians(-20)) {
-    aviao.rotation.x += degreesToRadians(-.5);  
-  }  
-}
-function returnElevator() {
-  if(aviao.rotation.x != degreesToRadians(0)) {
-    if(aviao.rotation.x > degreesToRadians(0))
-      aviao.rotation.x = degreesToRadians(-0);
-    else
-      aviao.rotation.x = degreesToRadians(0);  
+  else if (keyboard.pressed('down')) {
+    cameraHolder.rotateX(angle);
+    if(aviao.rotation.x <= degreesToRadians(20)) {
+      aviao.rotation.x += degreesToRadians(1);  
+    }
   } 
-}
+  else {
+    if (aviao.rotation.x > 0 && aviao.rotation.x <= degreesToRadians(21)) {
+      aviao.rotation.x -= degreesToRadians(.5);
+    }
+    if (aviao.rotation.x < 0 && aviao.rotation.x >= degreesToRadians(-21)) {
+      aviao.rotation.x += degreesToRadians(.5);
+    }
+  } 
+
+  if (keyboard.pressed('left'))  {
+    cameraHolder.rotateZ(angle);
+    if(aviao.rotation.y >= degreesToRadians(-45)) {
+      aviao.rotation.y += degreesToRadians(-1); 
+    } 
+  }  
+  else if (keyboard.pressed('right')) {
+    cameraHolder.rotateZ(-angle);
+    if(aviao.rotation.y <= degreesToRadians(45)) {
+      aviao.rotation.y += degreesToRadians(1); 
+    }
+  }
+  else {
+    if (aviao.rotation.y > 0 && aviao.rotation.y <= degreesToRadians(46)) {
+      aviao.rotation.y -= degreesToRadians(.5);
+    }
+    if (aviao.rotation.y < 0 && aviao.rotation.y >= degreesToRadians(-46)) {
+      aviao.rotation.y += degreesToRadians(.5);
+    }
+  }  
+}  
 
 function showInformation()
 {
@@ -180,20 +166,12 @@ function render()
 {
   stats.update(); // Update FPS
   keyboardUpdate();
-
-  if(keyboard.pressed('right')) moveAileronRight();
-  if(keyboard.pressed('left')) moveAileronLeft();
-  if(keyboard.up('left') || keyboard.up('right')) returnAileron(); 
-  if(keyboard.pressed('up')) moveElevatorDown();
-  if(keyboard.pressed('down')) moveElevatorUp();
-  if(keyboard.up('up') || keyboard.up('down')) returnElevator(); 
-  
   requestAnimationFrame(render); // Show events
+  renderer.render(scene, camera); // Render scene
   if (groundPlane.visible) {
     trackballControls.enabled = false;
   } else {
     trackballControls.enabled = true;
     trackballControls.update();
   }
-  renderer.render(scene, camera); // Render scene
 }
