@@ -22,7 +22,7 @@ var camera = new THREE.PerspectiveCamera(
   45,
   window.innerWidth / window.innerHeight,
   0.1,
-  1000
+  1000000
 );
 
 /* sets the position of the camera at the backward of the plane */
@@ -49,14 +49,14 @@ window.addEventListener(
 /**
  * wireframe plan
  */
-var groundPlane = createGroundPlaneWired(2000, 2000);
+var groundPlane = createGroundPlaneWired(20000, 200000, 10, 100);
 groundPlane.rotateX(degreesToRadians(90));
 scene.add(groundPlane);
 
 /**
  * axis for reference
  */
-var axesHelper = new THREE.AxesHelper(20);
+var axesHelper = new THREE.AxesHelper(50);
 scene.add(axesHelper);
 
 /**
@@ -80,7 +80,7 @@ var keyboard = new KeyboardState();
  * simple object to controll camera
  */
 var cameraHolder = new THREE.Object3D();
-cameraHolder.position.set(0, 0, 0);
+cameraHolder.position.set(0, 0, 100);
 scene.add(cameraHolder);
 cameraHolder.add(camera);
 cameraHolder.add(aviao);
@@ -137,7 +137,7 @@ async function keyboardUpdate() {
   }
 
   if (keyboard.pressed('left') && aviao.rotation.y <= degreesToRadians(1)) {
-    cameraHolder.rotateZ(angle);
+    //cameraHolder.rotateZ(angle);
     if (aviao.rotation.y >= degreesToRadians(-45)) {
       aviao.rotation.y += degreesToRadians(-1);
     }
@@ -145,16 +145,16 @@ async function keyboardUpdate() {
     keyboard.pressed('right') &&
     aviao.rotation.y >= degreesToRadians(-1)
   ) {
-    cameraHolder.rotateZ(-angle);
+    //cameraHolder.rotateZ(-angle);
     if (aviao.rotation.y <= degreesToRadians(45)) {
       aviao.rotation.y += degreesToRadians(1);
     }
   } else {
     if (aviao.rotation.y > 0 && aviao.rotation.y <= degreesToRadians(46)) {
-      aviao.rotation.y -= degreesToRadians(0.5);
+      aviao.rotation.y -= degreesToRadians(0.3);
     }
     if (aviao.rotation.y < 0 && aviao.rotation.y >= degreesToRadians(-46)) {
-      aviao.rotation.y += degreesToRadians(0.5);
+      aviao.rotation.y += degreesToRadians(0.3);
     }
   }
 }
