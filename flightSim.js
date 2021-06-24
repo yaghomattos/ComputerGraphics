@@ -92,7 +92,9 @@ const speed = 1.0; /* sets the initial speed */
 let mult = 5; /* sets initial speed multiplication */
 var verification = false; /* movement check */
 
-var angle = degreesToRadians(0.4); /* rotation angle*/
+var angle = degreesToRadians(0.2); /* rotation angle*/
+let angulaSpeedVertical = 1;
+let angulaSpeedHorizontal = 1;
 
 async function keyboardUpdate() {
   keyboard.update();
@@ -119,46 +121,54 @@ async function keyboardUpdate() {
   }
 
   if (keyboard.pressed('up') && aviao.rotation.x <= degreesToRadians(1)) {
-    cameraHolder.rotateX(-angle);
+    cameraHolder.rotateX(-angle * angulaSpeedVertical);
     if (aviao.rotation.x >= degreesToRadians(-20)) {
       aviao.rotation.x += degreesToRadians(-1);
+      angulaSpeedVertical += 0.05;
     }
   } else if (
     keyboard.pressed('down') &&
     aviao.rotation.x >= degreesToRadians(-1)
   ) {
-    cameraHolder.rotateX(angle);
+    cameraHolder.rotateX(angle * angulaSpeedVertical);
     if (aviao.rotation.x <= degreesToRadians(20)) {
       aviao.rotation.x += degreesToRadians(1);
+      angulaSpeedVertical += 0.05;
     }
   } else {
     if (aviao.rotation.x > 0 && aviao.rotation.x <= degreesToRadians(21)) {
       aviao.rotation.x -= degreesToRadians(0.5);
+      angulaSpeedVertical = 1;
     }
     if (aviao.rotation.x < 0 && aviao.rotation.x >= degreesToRadians(-21)) {
       aviao.rotation.x += degreesToRadians(0.5);
+      angulaSpeedVertical = 1;
     }
   }
 
   if (keyboard.pressed('left') && aviao.rotation.y <= degreesToRadians(1)) {
-    cameraHolder.rotateZ(angle);
+    cameraHolder.rotateZ(angle * angulaSpeedHorizontal);
     if (aviao.rotation.y >= degreesToRadians(-50)) {
       aviao.rotation.y += degreesToRadians(-1);
+      angulaSpeedHorizontal += 0.05;
     }
   } else if (
     keyboard.pressed('right') &&
     aviao.rotation.y >= degreesToRadians(-1)
   ) {
-    cameraHolder.rotateZ(-angle);
+    cameraHolder.rotateZ(-angle * angulaSpeedHorizontal);
     if (aviao.rotation.y <= degreesToRadians(50)) {
       aviao.rotation.y += degreesToRadians(1);
+      angulaSpeedHorizontal += 0.05;
     }
   } else {
     if (aviao.rotation.y > 0 && aviao.rotation.y <= degreesToRadians(51)) {
       aviao.rotation.y -= degreesToRadians(0.5);
+      angulaSpeedHorizontal = 1;
     }
     if (aviao.rotation.y < 0 && aviao.rotation.y >= degreesToRadians(-51)) {
       aviao.rotation.y += degreesToRadians(0.5);
+      angulaSpeedHorizontal = 1;
     }
   }
 }
