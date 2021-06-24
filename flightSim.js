@@ -49,14 +49,14 @@ window.addEventListener(
 /**
  * wireframe plan
  */
-var groundPlane = createGroundPlaneWired(20000, 200000, 10, 100);
+var groundPlane = createGroundPlaneWired(50000, 50000, 100, 100);
 groundPlane.rotateX(degreesToRadians(90));
 scene.add(groundPlane);
 
 /**
  * axis for reference
  */
-var axesHelper = new THREE.AxesHelper(50);
+var axesHelper = new THREE.AxesHelper(20);
 scene.add(axesHelper);
 
 /**
@@ -64,6 +64,7 @@ scene.add(axesHelper);
  */
 var aviao = gerarAviao();
 aviao.translateZ(2);
+aviao.translateY(5);
 scene.add(aviao);
 
 /**
@@ -80,7 +81,7 @@ var keyboard = new KeyboardState();
  * simple object to controll camera
  */
 var cameraHolder = new THREE.Object3D();
-cameraHolder.position.set(0, 0, 100);
+cameraHolder.position.set(0, 0, 50);
 scene.add(cameraHolder);
 cameraHolder.add(camera);
 cameraHolder.add(aviao);
@@ -88,7 +89,7 @@ cameraHolder.add(aviao);
 render();
 
 const speed = 1.0; /* sets the initial speed */
-let mult = 0.8; /* sets initial speed multiplication */
+let mult = 5; /* sets initial speed multiplication */
 var verification = false; /* movement check */
 
 var angle = degreesToRadians(0.4); /* rotation angle*/
@@ -110,11 +111,11 @@ async function keyboardUpdate() {
 
   if (verification) cameraHolder.translateY(speed * mult);
 
-  if (keyboard.pressed('Q') && mult <= 8) {
-    mult += 0.05;
+  if (keyboard.pressed('Q') && mult <= 20) {
+    mult += 0.1;
   }
-  if (keyboard.pressed('A') && mult > 0.5) {
-    mult -= 0.05;
+  if (keyboard.pressed('A') && mult > 5) {
+    mult -= 0.1;
   }
 
   if (keyboard.pressed('up') && aviao.rotation.x <= degreesToRadians(1)) {
@@ -122,7 +123,10 @@ async function keyboardUpdate() {
     if (aviao.rotation.x >= degreesToRadians(-20)) {
       aviao.rotation.x += degreesToRadians(-1);
     }
-  } else if (keyboard.pressed('down') && aviao.rotation.x >= degreesToRadians(-1)) {
+  } else if (
+    keyboard.pressed('down') &&
+    aviao.rotation.x >= degreesToRadians(-1)
+  ) {
     cameraHolder.rotateX(angle);
     if (aviao.rotation.x <= degreesToRadians(20)) {
       aviao.rotation.x += degreesToRadians(1);
@@ -137,24 +141,24 @@ async function keyboardUpdate() {
   }
 
   if (keyboard.pressed('left') && aviao.rotation.y <= degreesToRadians(1)) {
-    //cameraHolder.rotateZ(angle);
-    if (aviao.rotation.y >= degreesToRadians(-45)) {
+    cameraHolder.rotateZ(angle);
+    if (aviao.rotation.y >= degreesToRadians(-50)) {
       aviao.rotation.y += degreesToRadians(-1);
     }
   } else if (
     keyboard.pressed('right') &&
     aviao.rotation.y >= degreesToRadians(-1)
   ) {
-    //cameraHolder.rotateZ(-angle);
-    if (aviao.rotation.y <= degreesToRadians(45)) {
+    cameraHolder.rotateZ(-angle);
+    if (aviao.rotation.y <= degreesToRadians(50)) {
       aviao.rotation.y += degreesToRadians(1);
     }
   } else {
-    if (aviao.rotation.y > 0 && aviao.rotation.y <= degreesToRadians(46)) {
-      aviao.rotation.y -= degreesToRadians(0.3);
+    if (aviao.rotation.y > 0 && aviao.rotation.y <= degreesToRadians(51)) {
+      aviao.rotation.y -= degreesToRadians(0.5);
     }
-    if (aviao.rotation.y < 0 && aviao.rotation.y >= degreesToRadians(-46)) {
-      aviao.rotation.y += degreesToRadians(0.3);
+    if (aviao.rotation.y < 0 && aviao.rotation.y >= degreesToRadians(-51)) {
+      aviao.rotation.y += degreesToRadians(0.5);
     }
   }
 }
