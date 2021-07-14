@@ -5,10 +5,11 @@ import { TrackballControls } from '../build/jsm/controls/TrackballControls.js';
 import {
   initRenderer,
   InfoBox,
+  SecondaryBox,
   createGroundPlaneWired,
-  initDefaultBasicLight,
   onWindowResize,
   degreesToRadians,
+  createLightSphere,
 } from '../libs/util/util.js';
 
 import { gerarAviao } from './airplane.js';
@@ -32,11 +33,6 @@ camera.up.set(0.0, 1.0, 0.0);
 
 var trackballControls = new TrackballControls(camera, renderer.domElement);
 
-/**
- * simple light
- */
-initDefaultBasicLight(scene);
-
 // Listen window size changes
 window.addEventListener(
   'resize',
@@ -45,6 +41,30 @@ window.addEventListener(
   },
   false
 );
+
+/**
+ * Lights -> HemisphereLight, SpotLight and LightSphere (Sol)
+ */
+var lightSphere = createLightSphere(
+  scene,
+  100,
+  50,
+  50,
+  new THREE.Vector3(0, 1000, 100)
+);
+scene.add(lightSphere);
+
+var spotLight = new THREE.SpotLight('rgb(255,255,255)');
+spotLight.position.copy(new THREE.Vector3(0, 1000, 100));
+spotLight.angle = degreesToRadians(40);
+spotLight.castShadow = true;
+spotLight.decay = 2;
+spotLight.penumbra = 0.5;
+spotLight.name = 'Spot Light';
+scene.add(spotLight);
+
+var light = new THREE.HemisphereLight();
+scene.add(light);
 
 /**
  * wireframe plan
@@ -72,6 +92,8 @@ scene.add(aviao);
  */
 showInformation();
 
+var speedBox = new SecondaryBox('');
+
 /**
  * get keyboard data
  */
@@ -88,9 +110,13 @@ cameraHolder.add(aviao);
 
 render();
 
+function updateSpeed() {
+  speedBox.changeMessage('Speed: ' + (speed * mult).toFixed(2));
+}
+
 const speed = 1.0; /* sets the initial speed */
 let mult = 5; /* sets initial speed multiplication */
-var verification = false; /* movement check */
+var movement = false; /* movement check */
 
 var angle = degreesToRadians(0.2); /* rotation angle*/
 let angulaSpeedVertical = 1;
@@ -99,25 +125,22 @@ let angulaSpeedHorizontal = 1;
 async function keyboardUpdate() {
   keyboard.update();
 
-  if (keyboard.down('enter')) {
-    verification = !verification;
-  }
-
   if (keyboard.down('space')) {
     groundPlane.visible = !groundPlane.visible;
     axesHelper.visible = !axesHelper.visible;
-    if (groundPlane.visible) {
-      location.reload();
-    }
   }
 
-  if (verification) cameraHolder.translateY(speed * mult);
+  if (movement) cameraHolder.translateY(speed * mult);
+  else cameraHolder.translateY(0);
 
   if (keyboard.pressed('Q') && mult <= 20) {
     mult += 0.1;
+    updateSpeed();
+    movement = true;
   }
   if (keyboard.pressed('A') && mult > 5) {
     mult -= 0.1;
+    updateSpeed();
   }
 
   if (keyboard.pressed('up') && aviao.rotation.x <= degreesToRadians(1)) {
@@ -178,7 +201,6 @@ function showInformation() {
   var controls = new InfoBox();
   controls.add('Controls');
   controls.addParagraph();
-  controls.add('Enter to start moving');
   controls.add('Space to change camera mode');
   controls.add('Q to speed up');
   controls.add('A to speed down');
@@ -192,6 +214,9 @@ function render() {
   keyboardUpdate();
   requestAnimationFrame(render); // Show events
   renderer.render(scene, camera); // Render scene
+
+  /* Ativar trackballs para melhor visualização do mapa todo */
+  //trackballControls.update();
 
   if (groundPlane.visible) {
     trackballControls.enabled = false;
