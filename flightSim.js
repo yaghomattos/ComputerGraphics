@@ -140,7 +140,8 @@ function updateSpeed() {
   }
 }
 
-var sim = false;
+var sim = 0;
+var cockpit = false;
 
 var planePosition = {
   position: { x: aviao.position.x, y: aviao.position.y, z: aviao.position.z },
@@ -254,6 +255,40 @@ function changeCamera() {
   sim = !sim;
 }
 
+function cameraCockpit() {
+  if(!sim && cockpit) {
+    aviao.position.set(
+      planePosition.position.x,
+      planePosition.position.y,
+      planePosition.position.z
+    );
+
+    cameraHolder.position.set(
+      cameraHolderPosition.position.x,
+      cameraHolderPosition.position.y,
+      cameraHolderPosition.position.z
+    );
+    cameraHolder.rotation.set(
+      cameraHolderPosition.rotation.x,
+      cameraHolderPosition.rotation.y,
+      cameraHolderPosition.rotation.z
+    );
+
+    camera.position.set(0, 5, 4);
+    camera.rotation.set(
+      cameraPosition.rotation.x,
+      cameraPosition.rotation.y,
+      cameraPosition.rotation.z
+    );
+    camera.up.set(
+      cameraPosition.up.x,
+      cameraPosition.up.y,
+      cameraPosition.up.z
+    );
+  }
+  cockpit = !cockpit;
+}
+
 const speed = 1.0; /* sets the initial speed */
 let mult = 5; /* sets initial speed multiplication */
 var movement = false; /* movement check */
@@ -270,6 +305,10 @@ async function keyboardUpdate() {
   if (keyboard.down('space')) {
     mult = 0;
     changeCamera();
+  }
+
+  if (keyboard.pressed('C')) {
+    cameraCockpit();
   }
 
   if (movement) cameraHolder.translateY(speed * mult);
@@ -360,7 +399,7 @@ function render() {
 
   /* Ativar trackballs para melhor visualização do mapa todo */
   //trackballControls.update();
-
+  //changeCamera();
   if (sim) {
     trackballControls.enabled = true;
     trackballControls.update();
@@ -369,5 +408,6 @@ function render() {
   } else {
     groundPlane.visible = true;
     axesHelper.visible = false;
+    trackballControls.enabled = false;
   }
 }
