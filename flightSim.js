@@ -99,7 +99,7 @@ scene.add(track);
  * simple object to controll camera
  */
 var cameraHolder = new THREE.Object3D();
-cameraHolder.position.set(0, 0, 50);
+cameraHolder.position.set(0, 0, 0);
 scene.add(cameraHolder);
 cameraHolder.add(camera);
 cameraHolder.add(aviao);
@@ -148,20 +148,6 @@ var planePosition = {
   rotation: { x: aviao.rotation.x, y: aviao.rotation.y, z: aviao.rotation.z },
 };
 
-var cameraPosition = {
-  position: {
-    x: camera.position.x,
-    y: camera.position.y,
-    z: camera.position.z,
-  },
-  rotation: {
-    x: camera.rotation.x,
-    y: camera.rotation.y,
-    z: camera.rotation.z,
-  },
-  up: { x: camera.up.x, y: camera.up.y, z: camera.up.z },
-};
-
 var cameraHolderPosition = {
   position: {
     x: cameraHolder.position.x,
@@ -185,18 +171,6 @@ function changeCamera() {
     planePosition.rotation.y = aviao.rotation.y;
     planePosition.rotation.z = aviao.rotation.z;
 
-    cameraPosition.position.x = camera.position.x;
-    cameraPosition.position.y = camera.position.y;
-    cameraPosition.position.z = camera.position.z;
-
-    cameraPosition.up.x = camera.up.x;
-    cameraPosition.up.y = camera.up.y;
-    cameraPosition.up.z = camera.up.z;
-
-    cameraPosition.rotation.x = camera.rotation.x;
-    cameraPosition.rotation.y = camera.rotation.y;
-    cameraPosition.rotation.z = camera.rotation.z;
-
     cameraHolderPosition.rotation.x = cameraHolder.rotation.x;
     cameraHolderPosition.rotation.y = cameraHolder.rotation.y;
     cameraHolderPosition.rotation.z = cameraHolder.rotation.z;
@@ -205,12 +179,12 @@ function changeCamera() {
     cameraHolderPosition.position.y = cameraHolder.position.y;
     cameraHolderPosition.position.z = cameraHolder.position.z;
 
-    aviao.position.set(0, 0, 10);
+    aviao.position.set(0, 0, 2);
 
     cameraHolder.position.set(0, 0, 0);
     cameraHolder.rotation.set(0, 0, 0);
 
-    camera.position.set(0, -50, 20);
+    camera.position.set(0, -0, 0);
     camera.rotation.set(0, 0, 0);
     camera.up.set(0, 1, 0);
   } else {
@@ -234,22 +208,6 @@ function changeCamera() {
       cameraHolderPosition.rotation.x,
       cameraHolderPosition.rotation.y,
       cameraHolderPosition.rotation.z
-    );
-
-    camera.position.set(
-      cameraPosition.position.x,
-      cameraPosition.position.y,
-      cameraPosition.position.z
-    );
-    camera.rotation.set(
-      cameraPosition.rotation.x,
-      cameraPosition.rotation.y,
-      cameraPosition.rotation.z
-    );
-    camera.up.set(
-      cameraPosition.up.x,
-      cameraPosition.up.y,
-      cameraPosition.up.z
     );
   }
   sim = !sim;
@@ -372,7 +330,9 @@ function render() {
 
   /* Ativar trackballs para melhor visualização do mapa todo */
   //trackballControls.update();
+
   cameraCockpit();
+
   if (sim) {
     trackballControls.enabled = true;
     trackballControls.update();
