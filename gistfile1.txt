@@ -1,0 +1,109 @@
+var posicaoKart1 = new THREE.Vector3();
+    posicaoKart1.copy(c1.position);
+    
+
+    var cyz = 0.0;
+    var control = -1;
+    var origin = new THREE.Vector3(0, 0,3);
+    var positionLookCamera = new THREE.Vector3();
+    changeCamera();
+    function changeCamera() {
+        control = control +1;
+        if (control == 1) {
+            trackballControls.reset();
+            trackballControls.enablePan = false;
+            trackballControls.enableRotate = false;
+            camera.position.set(40, 0, 9);
+            plane.visible = true;
+            camera.rotation.set(0,0,0);
+            trackballControls.update();
+        }
+        if (control== 2){
+            trackballControls.reset();
+            trackballControls.enablePan = true;
+            trackballControls.enableRotate = true;
+            plane.visible = false;
+            c1.position.copy(origin);
+            camera.position.copy(position);
+            control = control -3;
+            trackballControls.update();
+        }
+        if (control == 0){
+            plane.visible = true;
+            trackballControls.reset();
+            trackballControls.enablePan = false;
+            trackballControls.enableRotate = false;
+            camera.position.set(2.2, 0, 5);
+            trackballControls.update();
+            c1.position.copy(posicaoKart1);
+        }
+    }
+    
+    function keyboardUpdate() {
+
+        keyboard.update();
+
+        if (keyboard.pressed("left")) {
+          if (speed < -0.05 || speed > 0.05) {
+          c1.rotation.z += 0.02;
+          angle += 0.02;
+          }
+        if (cyz < 0.35) {
+            cy2.matrix.multiply(mat4.makeRotationZ(angleRot));
+            cyz += angleRot;
+          }
+        }
+        if (keyboard.pressed("right")) {
+          if (speed < -0.05 || speed > 0.05) {
+            c1.rotation.z -= 0.02;
+            angle -= 0.02;
+          }
+          if (cyz > -0.35) {
+            cy2.matrix.multiply(mat4.makeRotationZ(-angleRot));
+            cyz -= angleRot;
+          }
+        }
+        if (keyboard.pressed("up")) {
+            if (speed < 3) { speed += speedFactor; }
+        }
+        if (keyboard.pressed("down")) {
+            if (speed > -3) { speed -= speedFactor; }
+        }
+
+        if (keyboard.down("space")){
+            changeCamera();
+        }
+
+        if (speed > 0) {
+            speed -= speedFactor * 0.6;
+        } else if (speed < 0) {
+            speed += speedFactor * 0.6;
+        }
+
+        if (cyz > 0) {
+            cy2.matrix.multiply(mat4.makeRotationZ(-angleRot / 1.4));
+            cyz -= angleRot / 1.4;
+        } else if (cyz < 0) {
+            cy2.matrix.multiply(mat4.makeRotationZ(angleRot / 1.4));
+            cyz += angleRot / 1.4;
+        }
+
+        c1.position.x += speed * Math.sin(-angle);
+        c1.position.y += speed * Math.cos(-angle);
+
+        spotLight.target.position.copy(c1.getWorldPosition());
+
+        plane.add(spotLight.target);
+        positionLookCamera.copy(c1.position);
+        if(control==1) {
+          positionLookCamera.copy(c1.position);
+          posicaoKart1.copy(c1.position);
+        }
+        if(control==0) {
+          var aux2C1 = new THREE.Vector3();
+          auxCamera.getWorldPosition(aux2C1);
+          positionLookCamera.copy(aux2C1);
+        }
+        camera.lookAt(positionLookCamera);
+        
+    }

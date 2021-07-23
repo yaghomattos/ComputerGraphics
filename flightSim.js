@@ -13,6 +13,7 @@ import {
 } from '../libs/util/util.js';
 
 import { gerarAviao } from './airplane.js';
+import { generateTrack } from './track.js';
 
 var scene = new THREE.Scene(); // Create main scene
 var stats = new Stats(); // To show FPS information
@@ -41,6 +42,12 @@ window.addEventListener(
   },
   false
 );
+
+/**
+ * axis for reference
+ */
+var axesHelper = new THREE.AxesHelper(20);
+scene.add(axesHelper);
 
 /**
  * Lights -> HemisphereLight, SpotLight and LightSphere (Sol)
@@ -74,12 +81,6 @@ groundPlane.rotateX(degreesToRadians(90));
 scene.add(groundPlane);
 
 /**
- * axis for reference
- */
-var axesHelper = new THREE.AxesHelper(20);
-scene.add(axesHelper);
-
-/**
  * airplane
  */
 var aviao = gerarAviao();
@@ -88,16 +89,11 @@ aviao.translateY(5);
 scene.add(aviao);
 
 /**
- * display information on screen
+ * Track
  */
-showInformation();
-
-var speedBox = new SecondaryBox('');
-
-/**
- * get keyboard data
- */
-var keyboard = new KeyboardState();
+var track = generateTrack();
+track.position.set(0, 0, 10);
+scene.add(track);
 
 /**
  * simple object to controll camera
@@ -108,10 +104,40 @@ scene.add(cameraHolder);
 cameraHolder.add(camera);
 cameraHolder.add(aviao);
 
+showInformation();
+
+var speedBox = new SecondaryBox('');
+
+var maxSpeedBox = new SecondaryBox('');
+maxSpeedBox.box.style.left = '225px';
+maxSpeedBox.box.style.display = 'none';
+
+var timeBox = new SecondaryBox('');
+timeBox.box.style.bottom = '50px';
+
+var keyboard = new KeyboardState();
+
 render();
 
+/* timer */
+var timer = new THREE.Clock();
+var delta = 0;
+
+function updateTime() {
+  delta += timer.getDelta();
+  timeBox.changeMessage(' Time: ' + delta.toFixed(2));
+}
+
+/* message speed */
 function updateSpeed() {
-  speedBox.changeMessage('Speed: ' + (speed * mult).toFixed(2));
+  speedBox.changeMessage('Speed: ' + (speed * mult * 48).toFixed(0) + ' km/h');
+  if (speed * mult * 48 >= 840) {
+    maxSpeedBox.changeMessage('MAX');
+    maxSpeedBox.box.style.display = 'block';
+  } else {
+    maxSpeedBox.changeMessage('');
+    maxSpeedBox.box.style.display = 'none';
+  }
 }
 
 const speed = 1.0; /* sets the initial speed */
@@ -125,6 +151,8 @@ let angulaSpeedHorizontal = 1;
 async function keyboardUpdate() {
   keyboard.update();
 
+  if (movement == true) updateTime();
+
   if (keyboard.down('space')) {
     groundPlane.visible = !groundPlane.visible;
     axesHelper.visible = !axesHelper.visible;
@@ -133,18 +161,19 @@ async function keyboardUpdate() {
   if (movement) cameraHolder.translateY(speed * mult);
   else cameraHolder.translateY(0);
 
-  if (keyboard.pressed('Q') && mult <= 20) {
+  if (keyboard.pressed('Q') && mult < 17.4) {
     mult += 0.1;
     updateSpeed();
     movement = true;
   }
-  if (keyboard.pressed('A') && mult > 5) {
+  if (keyboard.pressed('A') && mult > 5.1) {
     mult -= 0.1;
     updateSpeed();
   }
 
   if (keyboard.pressed('up') && aviao.rotation.x <= degreesToRadians(1)) {
     cameraHolder.rotateX(-angle * angulaSpeedVertical);
+    timer.stop;
     if (aviao.rotation.x >= degreesToRadians(-20)) {
       aviao.rotation.x += degreesToRadians(-1);
       angulaSpeedVertical += 0.05;
