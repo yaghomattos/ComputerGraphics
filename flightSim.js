@@ -32,7 +32,19 @@ camera.position.set(0.0, -30.0, 10.0);
 camera.lookAt(0.0, 0.0, 0.0);
 camera.up.set(0.0, 1.0, 0.0);
 
-var trackballControls = new TrackballControls(camera, renderer.domElement);
+var camera2 = new THREE.PerspectiveCamera(
+  45,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000000
+);
+
+/* sets the position of the camera at the backward of the plane */
+camera2.position.set(0.0, -30.0, 10.0);
+camera2.lookAt(0.0, 0.0, 0.0);
+camera2.up.set(0.0, 1.0, 0.0);
+
+var trackballControls = new TrackballControls(camera2, renderer.domElement);
 
 // Listen window size changes
 window.addEventListener(
@@ -140,81 +152,19 @@ function updateSpeed() {
   }
 }
 
-var sim = 0;
+var sim = true;
 var cockpit = false;
 
-var planePosition = {
-  position: { x: aviao.position.x, y: aviao.position.y, z: aviao.position.z },
-  rotation: { x: aviao.rotation.x, y: aviao.rotation.y, z: aviao.rotation.z },
-};
-
-var cameraHolderPosition = {
-  position: {
-    x: cameraHolder.position.x,
-    y: cameraHolder.position.y,
-    z: cameraHolder.position.z,
-  },
-  rotation: {
-    x: cameraHolder.rotation.x,
-    y: cameraHolder.rotation.y,
-    z: cameraHolder.rotation.z,
-  },
-};
-
 function changeCamera() {
-  if (!sim) {
-    planePosition.position.x = aviao.position.x;
-    planePosition.position.y = aviao.position.y;
-    planePosition.position.z = aviao.position.z;
-
-    planePosition.rotation.x = aviao.rotation.x;
-    planePosition.rotation.y = aviao.rotation.y;
-    planePosition.rotation.z = aviao.rotation.z;
-
-    cameraHolderPosition.rotation.x = cameraHolder.rotation.x;
-    cameraHolderPosition.rotation.y = cameraHolder.rotation.y;
-    cameraHolderPosition.rotation.z = cameraHolder.rotation.z;
-
-    cameraHolderPosition.position.x = cameraHolder.position.x;
-    cameraHolderPosition.position.y = cameraHolder.position.y;
-    cameraHolderPosition.position.z = cameraHolder.position.z;
-
-    aviao.position.set(0, 0, 2);
-
-    cameraHolder.position.set(0, 0, 0);
-    cameraHolder.rotation.set(0, 0, 0);
-
-    camera.position.set(0, -0, 0);
-    camera.rotation.set(0, 0, 0);
-    camera.up.set(0, 1, 0);
+  if (sim) {
+    renderer.render(scene, camera); // Render scene
   } else {
-    aviao.position.set(
-      planePosition.position.x,
-      planePosition.position.y,
-      planePosition.position.z
-    );
-    aviao.rotation.set(
-      planePosition.rotation.x,
-      planePosition.rotation.y,
-      planePosition.rotation.z
-    );
-
-    cameraHolder.position.set(
-      cameraHolderPosition.position.x,
-      cameraHolderPosition.position.y,
-      cameraHolderPosition.position.z
-    );
-    cameraHolder.rotation.set(
-      cameraHolderPosition.rotation.x,
-      cameraHolderPosition.rotation.y,
-      cameraHolderPosition.rotation.z
-    );
+    renderer.render(scene, camera2);
   }
-  sim = !sim;
 }
 
 function cameraCockpit() {
-  if(!sim && cockpit) {
+  if(cockpit) {
     camera.position.set(0, 5, 4);
   }
   else camera.position.set(0, -30, 10)
@@ -235,7 +185,7 @@ async function keyboardUpdate() {
 
   if (keyboard.down('space')) {
     mult = 0;
-    changeCamera();
+    sim = !sim;
   }
 
   if (keyboard.down('C')) {
@@ -326,14 +276,15 @@ function render() {
   stats.update(); // Update FPS
   keyboardUpdate();
   requestAnimationFrame(render); // Show events
-  renderer.render(scene, camera); // Render scene
+  
 
   /* Ativar trackballs para melhor visualização do mapa todo */
   //trackballControls.update();
 
+  changeCamera();
   cameraCockpit();
 
-  if (sim) {
+  if (!sim) {
     trackballControls.enabled = true;
     trackballControls.update();
     groundPlane.visible = false;
