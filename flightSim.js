@@ -152,22 +152,116 @@ function updateSpeed() {
   }
 }
 
+var planePosition = {
+  position: { x: aviao.position.x, y: aviao.position.y, z: aviao.position.z },
+  rotation: { x: aviao.rotation.x, y: aviao.rotation.y, z: aviao.rotation.z },
+};
+
+var cameraPosition = {
+  position: {
+    x: camera.position.x,
+    y: camera.position.y,
+    z: camera.position.z,
+  },
+  rotation: {
+    x: camera.rotation.x,
+    y: camera.rotation.y,
+    z: camera.rotation.z,
+  },
+  up: { x: camera.up.x, y: camera.up.y, z: camera.up.z },
+};
+
+var cameraHolderPosition = {
+  position: {
+    x: cameraHolder.position.x,
+    y: cameraHolder.position.y,
+    z: cameraHolder.position.z,
+  },
+  rotation: {
+    x: cameraHolder.rotation.x,
+    y: cameraHolder.rotation.y,
+    z: cameraHolder.rotation.z,
+  },
+};
+
 var sim = true;
 var cockpit = false;
 
 function changeCamera() {
   if (sim) {
-    renderer.render(scene, camera); // Render scene
+    cameraPosition.position.x = camera.position.x;
+    cameraPosition.position.y = camera.position.y;
+    cameraPosition.position.z = camera.position.z;
+
+    cameraPosition.rotation.x = camera.rotation.x;
+    cameraPosition.rotation.y = camera.rotation.y;
+    cameraPosition.rotation.z = camera.rotation.z;
+
+    cameraPosition.up.x = camera.up.x;
+    cameraPosition.up.y = camera.up.y;
+    cameraPosition.up.z = camera.up.z;
+
+    cameraHolderPosition.rotation.x = cameraHolder.rotation.x;
+    cameraHolderPosition.rotation.y = cameraHolder.rotation.y;
+    cameraHolderPosition.rotation.z = cameraHolder.rotation.z;
+
+    cameraHolderPosition.position.x = cameraHolder.position.x;
+    cameraHolderPosition.position.y = cameraHolder.position.y;
+    cameraHolderPosition.position.z = cameraHolder.position.z;
+
+    aviao.position.set(0, 2, 4);
+
+    cameraHolder.position.set(0, 0, 0);
+    cameraHolder.rotation.set(0, 0, 0);
+
+    camera.position.set(0, -50, 20);
+    camera.rotation.set(0, 0, 0);
+    camera.up.set(0, 1, 0);
   } else {
-    renderer.render(scene, camera2);
+    aviao.position.set(
+      planePosition.position.x,
+      planePosition.position.y,
+      planePosition.position.z
+    );
+    aviao.rotation.set(
+      planePosition.rotation.x,
+      planePosition.rotation.y,
+      planePosition.rotation.z
+    );
+
+    cameraHolder.position.set(
+      cameraHolderPosition.position.x,
+      cameraHolderPosition.position.y,
+      cameraHolderPosition.position.z
+    );
+    cameraHolder.rotation.set(
+      cameraHolderPosition.rotation.x,
+      cameraHolderPosition.rotation.y,
+      cameraHolderPosition.rotation.z
+    );
+
+    camera.position.set(
+      cameraPosition.position.x,
+      cameraPosition.position.y,
+      cameraPosition.position.z
+    );
+    camera.rotation.set(
+      cameraPosition.rotation.x,
+      cameraPosition.rotation.y,
+      cameraPosition.rotation.z
+    );
+    camera.up.set(
+      cameraPosition.up.x,
+      cameraPosition.up.y,
+      cameraPosition.up.z
+    );
   }
 }
 
 function cameraCockpit() {
-  if(cockpit) {
+  if (cockpit) {
     camera.position.set(0, 5, 4);
-  }
-  else camera.position.set(0, -30, 10)
+  } else camera.position.set(0, -30, 10);
 }
 
 const speed = 1.0; /* sets the initial speed */
@@ -185,6 +279,7 @@ async function keyboardUpdate() {
 
   if (keyboard.down('space')) {
     mult = 0;
+    changeCamera();
     sim = !sim;
   }
 
@@ -276,12 +371,14 @@ function render() {
   stats.update(); // Update FPS
   keyboardUpdate();
   requestAnimationFrame(render); // Show events
-  
+  if (sim) renderer.render(scene, camera);
+  else renderer.render(scene, camera2);
 
   /* Ativar trackballs para melhor visualização do mapa todo */
   //trackballControls.update();
 
-  changeCamera();
+  //changeCamera();
+
   cameraCockpit();
 
   if (!sim) {
