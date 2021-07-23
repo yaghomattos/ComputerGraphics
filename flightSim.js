@@ -174,7 +174,7 @@ var cameraHolderPosition = {
   },
 };
 
-function mudaCamera() {
+function changeCamera() {
   if (!sim) {
     planePosition.position.x = aviao.position.x;
     planePosition.position.y = aviao.position.y;
@@ -188,13 +188,13 @@ function mudaCamera() {
     cameraPosition.position.y = camera.position.y;
     cameraPosition.position.z = camera.position.z;
 
-    cameraPosition.rotation.x = camera.rotation.x;
-    cameraPosition.rotation.y = camera.rotation.y;
-    cameraPosition.rotation.z = camera.rotation.z;
-
     cameraPosition.up.x = camera.up.x;
     cameraPosition.up.y = camera.up.y;
     cameraPosition.up.z = camera.up.z;
+
+    cameraPosition.rotation.x = camera.rotation.x;
+    cameraPosition.rotation.y = camera.rotation.y;
+    cameraPosition.rotation.z = camera.rotation.z;
 
     cameraHolderPosition.rotation.x = cameraHolder.rotation.x;
     cameraHolderPosition.rotation.y = cameraHolder.rotation.y;
@@ -204,7 +204,7 @@ function mudaCamera() {
     cameraHolderPosition.position.y = cameraHolder.position.y;
     cameraHolderPosition.position.z = cameraHolder.position.z;
 
-        aviao.position.set(0, 0, 10);
+    aviao.position.set(0, 0, 10);
 
     cameraHolder.position.set(0, 0, 0);
     cameraHolder.rotation.set(0, 0, 0);
@@ -212,7 +212,6 @@ function mudaCamera() {
     camera.position.set(0, -50, 20);
     camera.rotation.set(0, 0, 0);
     camera.up.set(0, 1, 0);
-
   } else {
     aviao.position.set(
       planePosition.position.x,
@@ -270,7 +269,7 @@ async function keyboardUpdate() {
 
   if (keyboard.down('space')) {
     mult = 0;
-    mudaCamera();
+    changeCamera();
   }
 
   if (movement) cameraHolder.translateY(speed * mult);
@@ -365,10 +364,10 @@ function render() {
   if (sim) {
     trackballControls.enabled = true;
     trackballControls.update();
-    groundPlane.visible = false
-    axesHelper.visible = true
+    groundPlane.visible = false;
+    axesHelper.visible = true;
   } else {
-    groundPlane.visible = true
-    axesHelper.visible = false
+    groundPlane.visible = true;
+    axesHelper.visible = false;
   }
 }
