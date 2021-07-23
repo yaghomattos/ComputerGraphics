@@ -140,6 +140,121 @@ function updateSpeed() {
   }
 }
 
+var sim = false;
+
+var planePosition = {
+  position: { x: aviao.position.x, y: aviao.position.y, z: aviao.position.z },
+  rotation: { x: aviao.rotation.x, y: aviao.rotation.y, z: aviao.rotation.z },
+};
+
+var cameraPosition = {
+  position: {
+    x: camera.position.x,
+    y: camera.position.y,
+    z: camera.position.z,
+  },
+  rotation: {
+    x: camera.rotation.x,
+    y: camera.rotation.y,
+    z: camera.rotation.z,
+  },
+  up: { x: camera.up.x, y: camera.up.y, z: camera.up.z },
+};
+
+var cameraHolderPosition = {
+  position: {
+    x: cameraHolder.position.x,
+    y: cameraHolder.position.y,
+    z: cameraHolder.position.z,
+  },
+  rotation: {
+    x: cameraHolder.rotation.x,
+    y: cameraHolder.rotation.y,
+    z: cameraHolder.rotation.z,
+  },
+};
+
+function mudaCamera() {
+  if (!sim) {
+    planePosition.position.x = aviao.position.x;
+    planePosition.position.y = aviao.position.y;
+    planePosition.position.z = aviao.position.z;
+
+    planePosition.rotation.x = aviao.rotation.x;
+    planePosition.rotation.y = aviao.rotation.y;
+    planePosition.rotation.z = aviao.rotation.z;
+
+    cameraPosition.position.x = camera.position.x;
+    cameraPosition.position.y = camera.position.y;
+    cameraPosition.position.z = camera.position.z;
+
+    cameraPosition.rotation.x = camera.rotation.x;
+    cameraPosition.rotation.y = camera.rotation.y;
+    cameraPosition.rotation.z = camera.rotation.z;
+
+    cameraPosition.up.x = camera.up.x;
+    cameraPosition.up.y = camera.up.y;
+    cameraPosition.up.z = camera.up.z;
+
+    cameraHolderPosition.rotation.x = cameraHolder.rotation.x;
+    cameraHolderPosition.rotation.y = cameraHolder.rotation.y;
+    cameraHolderPosition.rotation.z = cameraHolder.rotation.z;
+
+    cameraHolderPosition.position.x = cameraHolder.position.x;
+    cameraHolderPosition.position.y = cameraHolder.position.y;
+    cameraHolderPosition.position.z = cameraHolder.position.z;
+
+        aviao.position.set(0, 0, 10);
+
+    cameraHolder.position.set(0, 0, 0);
+    cameraHolder.rotation.set(0, 0, 0);
+
+    camera.position.set(0, -50, 20);
+    camera.rotation.set(0, 0, 0);
+    camera.up.set(0, 1, 0);
+
+  } else {
+    aviao.position.set(
+      planePosition.position.x,
+      planePosition.position.y,
+      planePosition.position.z
+    );
+    aviao.rotation.set(
+      planePosition.rotation.x,
+      planePosition.rotation.y,
+      planePosition.rotation.z
+    );
+
+    cameraHolder.position.set(
+      cameraHolderPosition.position.x,
+      cameraHolderPosition.position.y,
+      cameraHolderPosition.position.z
+    );
+    cameraHolder.rotation.set(
+      cameraHolderPosition.rotation.x,
+      cameraHolderPosition.rotation.y,
+      cameraHolderPosition.rotation.z
+    );
+
+    camera.position.set(
+      cameraPosition.position.x,
+      cameraPosition.position.y,
+      cameraPosition.position.z
+    );
+    camera.rotation.set(
+      cameraPosition.rotation.x,
+      cameraPosition.rotation.y,
+      cameraPosition.rotation.z
+    );
+    camera.up.set(
+      cameraPosition.up.x,
+      cameraPosition.up.y,
+      cameraPosition.up.z
+    );
+  }
+  sim = !sim;
+}
+
 const speed = 1.0; /* sets the initial speed */
 let mult = 5; /* sets initial speed multiplication */
 var movement = false; /* movement check */
@@ -154,8 +269,8 @@ async function keyboardUpdate() {
   if (movement == true) updateTime();
 
   if (keyboard.down('space')) {
-    groundPlane.visible = !groundPlane.visible;
-    axesHelper.visible = !axesHelper.visible;
+    mult = 0;
+    mudaCamera();
   }
 
   if (movement) cameraHolder.translateY(speed * mult);
@@ -247,10 +362,13 @@ function render() {
   /* Ativar trackballs para melhor visualização do mapa todo */
   //trackballControls.update();
 
-  if (groundPlane.visible) {
-    trackballControls.enabled = false;
-  } else {
+  if (sim) {
     trackballControls.enabled = true;
     trackballControls.update();
+    groundPlane.visible = false
+    axesHelper.visible = true
+  } else {
+    groundPlane.visible = true
+    axesHelper.visible = false
   }
 }
