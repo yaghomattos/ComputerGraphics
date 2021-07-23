@@ -257,36 +257,9 @@ function changeCamera() {
 
 function cameraCockpit() {
   if(!sim && cockpit) {
-    aviao.position.set(
-      planePosition.position.x,
-      planePosition.position.y,
-      planePosition.position.z
-    );
-
-    cameraHolder.position.set(
-      cameraHolderPosition.position.x,
-      cameraHolderPosition.position.y,
-      cameraHolderPosition.position.z
-    );
-    cameraHolder.rotation.set(
-      cameraHolderPosition.rotation.x,
-      cameraHolderPosition.rotation.y,
-      cameraHolderPosition.rotation.z
-    );
-
     camera.position.set(0, 5, 4);
-    camera.rotation.set(
-      cameraPosition.rotation.x,
-      cameraPosition.rotation.y,
-      cameraPosition.rotation.z
-    );
-    camera.up.set(
-      cameraPosition.up.x,
-      cameraPosition.up.y,
-      cameraPosition.up.z
-    );
   }
-  cockpit = !cockpit;
+  else camera.position.set(0, -30, 10)
 }
 
 const speed = 1.0; /* sets the initial speed */
@@ -307,8 +280,8 @@ async function keyboardUpdate() {
     changeCamera();
   }
 
-  if (keyboard.pressed('C')) {
-    cameraCockpit();
+  if (keyboard.down('C')) {
+    cockpit = !cockpit;
   }
 
   if (movement) cameraHolder.translateY(speed * mult);
@@ -399,7 +372,7 @@ function render() {
 
   /* Ativar trackballs para melhor visualização do mapa todo */
   //trackballControls.update();
-  //changeCamera();
+  cameraCockpit();
   if (sim) {
     trackballControls.enabled = true;
     trackballControls.update();
