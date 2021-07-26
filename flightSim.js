@@ -14,6 +14,7 @@ import {
 
 import { gerarAviao } from './airplane.js';
 import { generateTrack } from './track.js';
+import { createCheckpoints } from './track.js';
 
 var scene = new THREE.Scene(); // Create main scene
 var stats = new Stats(); // To show FPS information
@@ -28,7 +29,7 @@ var camera = new THREE.PerspectiveCamera(
 );
 
 /* sets the position of the camera at the backward of the plane */
-camera.position.set(0.0, -30.0, 10.0);
+camera.position.set(0.0, -90.0, 10.0);
 camera.lookAt(0.0, 0.0, 0.0);
 camera.up.set(0.0, 1.0, 0.0);
 
@@ -104,8 +105,15 @@ scene.add(aviao);
  * Track
  */
 var track = generateTrack();
-track.position.set(0, 0, 10);
 scene.add(track);
+
+var checkpoints = createCheckpoints();
+
+for(let i = 0; i < checkpoints.length; i++)
+{
+  var check = checkpoints[i];
+  scene.add(check);
+}
 
 /**
  * simple object to controll camera
@@ -331,7 +339,7 @@ async function keyboardUpdate() {
     cameraHolder.rotateZ(angle * angulaSpeedHorizontal);
     if (aviao.rotation.y >= degreesToRadians(-50)) {
       aviao.rotation.y += degreesToRadians(-1);
-      angulaSpeedHorizontal += 0.05;
+      angulaSpeedHorizontal += 0.5;
     }
   } else if (
     keyboard.pressed('right') &&
@@ -340,16 +348,16 @@ async function keyboardUpdate() {
     cameraHolder.rotateZ(-angle * angulaSpeedHorizontal);
     if (aviao.rotation.y <= degreesToRadians(50)) {
       aviao.rotation.y += degreesToRadians(1);
-      angulaSpeedHorizontal += 0.05;
+      angulaSpeedHorizontal += 0.5;
     }
   } else {
     if (aviao.rotation.y > 0 && aviao.rotation.y <= degreesToRadians(51)) {
       aviao.rotation.y -= degreesToRadians(0.5);
-      angulaSpeedHorizontal = 1;
+      angulaSpeedHorizontal = 0.5;
     }
     if (aviao.rotation.y < 0 && aviao.rotation.y >= degreesToRadians(-51)) {
       aviao.rotation.y += degreesToRadians(0.5);
-      angulaSpeedHorizontal = 1;
+      angulaSpeedHorizontal = 0.5;
     }
   }
 }
