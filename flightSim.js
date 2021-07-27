@@ -15,6 +15,7 @@ import {
 import { gerarAviao } from './airplane.js';
 import { generateTrack } from './track.js';
 import { createCheckpoints } from './track.js';
+import { getRadius } from './track.js';
 
 var scene = new THREE.Scene(); // Create main scene
 var stats = new Stats(); // To show FPS information
@@ -273,14 +274,15 @@ function cameraCockpit() {
 }
 
 const speed = 1.0; /* sets the initial speed */
-let mult = 5; /* sets initial speed multiplication */
+var mult = 5; /* sets initial speed multiplication */
 var movement = false; /* movement check */
 
 var angle = degreesToRadians(0.7); /* angle rotation */
-let angularSpeedVertical = 2;
-let angularSpeedHorizontal = 1;
-let animation = degreesToRadians(1);
-let modeCam2 = false;
+var angularSpeedVertical = 2;
+var angularSpeedHorizontal = 1;
+var animation = degreesToRadians(1);
+var modeCam2 = false;
+var started = false;
 
 async function keyboardUpdate() {
   keyboard.update();
@@ -305,7 +307,26 @@ async function keyboardUpdate() {
     timeBox.box.style.display = "block";
   }
 
-  if (movement) updateTime();
+  var radiusCheckpoint = getRadius();
+  
+  var inicioX = checkpoints[0].position.x;
+  var inicioY = checkpoints[0].position.y;
+  var inicioZ = checkpoints[0].position.z;
+
+  var aviaoX = cameraHolder.position.x;
+  var aviaoY = cameraHolder.position.y;
+  var aviaoZ = cameraHolder.position.z
+
+  if ((aviaoX > inicioX - radiusCheckpoint) && (aviaoX < inicioX + radiusCheckpoint) && 
+      (aviaoY > inicioY - radiusCheckpoint) && (aviaoY < inicioY + radiusCheckpoint) &&
+      (aviaoZ > inicioZ - radiusCheckpoint) && (aviaoZ < inicioZ + radiusCheckpoint)) 
+      {
+          started = true;
+          updateTime();
+      }
+
+  if(started)
+      updateTime();  
 
   if (keyboard.down('space')) {
     mult = 0;

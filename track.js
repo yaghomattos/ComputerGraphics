@@ -15,7 +15,7 @@ var curveTrackPoints = [
     new THREE.Vector3(3000, 80, -5000),    
     new THREE.Vector3(2500, 90, -3000),    
     new THREE.Vector3(1000, 50, -1000),    
-    new THREE.Vector3(100, 0, 0),  
+    new THREE.Vector3(100, 50, -30),  
   ]     
 
 export function generateTrack() {
@@ -44,8 +44,8 @@ export function createCheckpoints() {
     if(i == curveTrackPoints.length - 2)
     {
       checkpoint[j].position.x = 100;
-      checkpoint[j].position.y = 0;
-      checkpoint[j].position.z = 0;
+      checkpoint[j].position.y = 30;
+      checkpoint[j].position.z = 50;
       checkpoint[j].lookAt(checkpoint[j].position);
       checkpoint[j].rotateX(Math.PI/2);
     }
@@ -59,4 +59,8 @@ export function createCheckpoints() {
   }
   
   return checkpoint;
+}
+
+export function getRadius() {
+  return generateTorus().geometry.parameters.radius;
 }
