@@ -237,11 +237,6 @@ async function keyboardUpdate() {
     modeCam2 = !modeCam2;
 
     if (!modeCam2) mult = 5;
-
-    /* remove all objects */
-    sum.visible = !sum.visible;
-    track.visible = !track.visible;
-    check.visible = !check.visible;
   }
 
   if (keyboard.down('enter')) {
