@@ -185,7 +185,7 @@ function cameraCockpit() {
 const speed = 1.0; /* sets the initial speed */
 var mult = 5; /* sets initial speed multiplication */
 var movement = false; /* movement check */
-var angle = degreesToRadians(0.7); /* angle rotation */
+var angle = degreesToRadians(0.3); /* angle rotation */
 var angularSpeedVertical = 2;
 var angularSpeedHorizontal = 1;
 
@@ -276,17 +276,17 @@ async function keyboardUpdate() {
       aviao.rotation.x += animation;
     }
   } else {
-    if (aviao.rotation.x > 0 && aviao.rotation.x <= degreesToRadians(21)) {
+    if (aviao.rotation.x > 0 && aviao.rotation.x <= degreesToRadians(22)) {
       aviao.rotation.x -= degreesToRadians(0.5);
     }
-    if (aviao.rotation.x < 0 && aviao.rotation.x >= degreesToRadians(-21)) {
+    if (aviao.rotation.x < 0 && aviao.rotation.x >= degreesToRadians(-22)) {
       aviao.rotation.x += degreesToRadians(0.5);
     }
   }
 
   if (keyboard.pressed('left') && aviao.rotation.y <= degreesToRadians(1)) {
     cameraHolder.rotateZ(angle * angularSpeedHorizontal);
-    if (aviao.rotation.y >= degreesToRadians(-50)) {
+    if (aviao.rotation.y >= degreesToRadians(-35)) {
       aviao.rotation.y -= animation;
       angularSpeedHorizontal += 0.1;
     }
@@ -295,16 +295,16 @@ async function keyboardUpdate() {
     aviao.rotation.y >= degreesToRadians(-1)
   ) {
     cameraHolder.rotateZ(-angle * angularSpeedHorizontal);
-    if (aviao.rotation.y <= degreesToRadians(50)) {
+    if (aviao.rotation.y <= degreesToRadians(35)) {
       aviao.rotation.y += animation;
       angularSpeedHorizontal += 0.1;
     }
   } else {
-    if (aviao.rotation.y > 0 && aviao.rotation.y <= degreesToRadians(51)) {
+    if (aviao.rotation.y > 0 && aviao.rotation.y <= degreesToRadians(40)) {
       aviao.rotation.y -= degreesToRadians(0.5);
       angularSpeedHorizontal = 0.5;
     }
-    if (aviao.rotation.y < 0 && aviao.rotation.y >= degreesToRadians(-51)) {
+    if (aviao.rotation.y < 0 && aviao.rotation.y >= degreesToRadians(-40)) {
       aviao.rotation.y += degreesToRadians(0.5);
       angularSpeedHorizontal = 0.5;
     }
