@@ -43,9 +43,9 @@ export function createCheckpoints() {
     
 
     var color = new THREE.Color();
-    color.r = (Math.min(0.9, (0.1 + j*1/curveTrackPoints.length)));
-    color.g = (Math.max(0, (0.9 - j*1/curveTrackPoints.length)));
-    color.b = 0.2
+    color.r = (Math.min(0.9, (0.1 + j*0.9/curveTrackPoints.length)));
+    color.g = (Math.max(0, (0.9 - j*1.3/curveTrackPoints.length)));
+    color.b = 0.3
 
     checkpoint[j] = generateTorus(color);
     if(i == curveTrackPoints.length - 2)
