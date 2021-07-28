@@ -28,19 +28,26 @@ export function generateTrack() {
   return curveObject;
 }
 
-function generateTorus() {
+function generateTorus(cor) {
   const geometry = new THREE.TorusGeometry(25, 4, 10, 50);
-  const material =  new THREE.MeshBasicMaterial( { color: 0xc94600, opacity: 0.8 , transparent: true } ); 
+  const material =  new THREE.MeshBasicMaterial( { color: cor, opacity: 0.8 , transparent: true } ); 
   const torus = new THREE.Mesh(geometry, material);
   return torus;
 }
 
 export function createCheckpoints() {
   var checkpoint = [];
+
   
   for (var i=1, j=0; i < curveTrackPoints.length - 1; i++, j++){
+    
 
-    checkpoint[j] = generateTorus();
+    var color = new THREE.Color();
+    color.r = (Math.min(0.9, (0.1 + j*1/curveTrackPoints.length)));
+    color.g = (Math.max(0, (0.9 - j*1/curveTrackPoints.length)));
+    color.b = 0.2
+
+    checkpoint[j] = generateTorus(color);
     if(i == curveTrackPoints.length - 2)
     {
       checkpoint[j].position.x = 100;
@@ -56,6 +63,8 @@ export function createCheckpoints() {
       checkpoint[j].lookAt(checkpoint[j].position);
       checkpoint[j].rotateX(Math.PI/2);
     }
+
+
   }
   
   return checkpoint;
