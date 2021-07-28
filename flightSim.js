@@ -187,7 +187,7 @@ var mult = 5; /* sets initial speed multiplication */
 var movement = false; /* movement check */
 var angle = degreesToRadians(0.3); /* angle rotation */
 var angularSpeedVertical = 2;
-var angularSpeedHorizontal = 1;
+var angularSpeedHorizontal = 0.015;
 
 var animation = degreesToRadians(1);
 var modeCam2 = false;
@@ -285,28 +285,25 @@ async function keyboardUpdate() {
   }
 
   if (keyboard.pressed('left') && aviao.rotation.y <= degreesToRadians(1)) {
-    cameraHolder.rotateZ(angle * angularSpeedHorizontal);
+    cameraHolder.rotateZ(angularSpeedHorizontal);
     if (aviao.rotation.y >= degreesToRadians(-35)) {
       aviao.rotation.y -= animation;
-      angularSpeedHorizontal += 0.1;
     }
   } else if (
     keyboard.pressed('right') &&
     aviao.rotation.y >= degreesToRadians(-1)
   ) {
-    cameraHolder.rotateZ(-angle * angularSpeedHorizontal);
+    cameraHolder.rotateZ(-angularSpeedHorizontal);
+    console.log(angularSpeedHorizontal)
     if (aviao.rotation.y <= degreesToRadians(35)) {
       aviao.rotation.y += animation;
-      angularSpeedHorizontal += 0.1;
     }
   } else {
     if (aviao.rotation.y > 0 && aviao.rotation.y <= degreesToRadians(40)) {
       aviao.rotation.y -= degreesToRadians(0.5);
-      angularSpeedHorizontal = 0.5;
     }
     if (aviao.rotation.y < 0 && aviao.rotation.y >= degreesToRadians(-40)) {
       aviao.rotation.y += degreesToRadians(0.5);
-      angularSpeedHorizontal = 0.5;
     }
   }
 }
