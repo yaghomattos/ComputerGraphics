@@ -10,6 +10,7 @@ import {
   onWindowResize,
   degreesToRadians,
   createLightSphere,
+  initDefaultBasicLight,
 } from '../libs/util/util.js';
 
 import { gerarAviao } from './airplane.js';
@@ -46,6 +47,17 @@ camera2.position.set(0.0, -30.0, 10.0);
 camera2.lookAt(0.0, 0.0, 0.0);
 camera2.up.set(0.0, 1.0, 0.0);
 
+var inspecScene = new THREE.Scene();
+initDefaultBasicLight(inspecScene);
+
+var aviaoInspec = gerarAviao();
+aviaoInspec.rotateZ(degreesToRadians(180));
+var planeInspec = new THREE.Object3D();
+planeInspec.add(aviaoInspec);
+planeInspec.position.set(0, 0, 0);
+
+inspecScene.add(planeInspec);
+
 var trackballControls = new TrackballControls(camera2, renderer.domElement);
 
 // Listen window size changes
@@ -68,21 +80,23 @@ scene.add(axesHelper);
  */
 var sum = createLightSphere(
   scene,
+  1000,
   100,
-  50,
-  50,
-  new THREE.Vector3(0, 1000, 100)
+  100,
+  new THREE.Vector3(10000, 25000, 5000)
 );
 scene.add(sum);
 
-var spotLight = new THREE.SpotLight('rgb(255,255,255)');
-spotLight.position.copy(new THREE.Vector3(0, 1000, 100));
-spotLight.angle = degreesToRadians(40);
-spotLight.castShadow = true;
-spotLight.decay = 2;
-spotLight.penumbra = 0.5;
-spotLight.name = 'Spot Light';
-scene.add(spotLight);
+var dirLight = new THREE.DirectionalLight("rgb(255,255,150)");
+dirLight.position.copy(new THREE.Vector3(10000, 25000, 5000));
+dirLight.shadow.mapSize.width = 2048;
+dirLight.shadow.mapSize.height = 2048;
+dirLight.castShadow = true;
+dirLight.shadow.camera.left = -200;
+dirLight.shadow.camera.right = 200;
+dirLight.shadow.camera.top = 200;
+dirLight.shadow.camera.bottom = -200;
+scene.add(dirLight);
 
 var light = new THREE.HemisphereLight();
 scene.add(light);
@@ -90,7 +104,7 @@ scene.add(light);
 /**
  * wireframe plan
  */
-var groundPlane = createGroundPlaneWired(50000, 50000, 100, 100);
+var groundPlane = createGroundPlaneWired(50000, 50000, 100, 100, "rgb(80,80,80)");
 groundPlane.rotateX(degreesToRadians(90));
 scene.add(groundPlane);
 
@@ -109,8 +123,7 @@ scene.add(track);
 
 var checkpoints = createCheckpoints();
 
-for(let i = 0; i < checkpoints.length; i++)
-{
+for (let i = 0; i < checkpoints.length; i++) {
   var check = checkpoints[i];
   scene.add(check);
 }
@@ -119,7 +132,7 @@ for(let i = 0; i < checkpoints.length; i++)
  * simple object to controll camera
  */
 var cameraHolder = new THREE.Object3D();
-cameraHolder.position.set(0, 0, 0);
+cameraHolder.position.set(0, -500, 0);
 scene.add(cameraHolder);
 cameraHolder.add(camera);
 cameraHolder.add(aviao);
@@ -160,112 +173,8 @@ function updateSpeed() {
   }
 }
 
-var planePosition = {
-  position: { x: aviao.position.x, y: aviao.position.y, z: aviao.position.z },
-  rotation: { x: aviao.rotation.x, y: aviao.rotation.y, z: aviao.rotation.z },
-};
-
-var cameraPosition = {
-  position: {
-    x: camera.position.x,
-    y: camera.position.y,
-    z: camera.position.z,
-  },
-  rotation: {
-    x: camera.rotation.x,
-    y: camera.rotation.y,
-    z: camera.rotation.z,
-  },
-  up: { x: camera.up.x, y: camera.up.y, z: camera.up.z },
-};
-
-var cameraHolderPosition = {
-  position: {
-    x: cameraHolder.position.x,
-    y: cameraHolder.position.y,
-    z: cameraHolder.position.z,
-  },
-  rotation: {
-    x: cameraHolder.rotation.x,
-    y: cameraHolder.rotation.y,
-    z: cameraHolder.rotation.z,
-  },
-};
-
 var sim = true;
 var cockpit = false;
-
-function changeCamera() {
-  if (sim) {
-    cameraPosition.position.x = camera.position.x;
-    cameraPosition.position.y = camera.position.y;
-    cameraPosition.position.z = camera.position.z;
-
-    cameraPosition.rotation.x = camera.rotation.x;
-    cameraPosition.rotation.y = camera.rotation.y;
-    cameraPosition.rotation.z = camera.rotation.z;
-
-    cameraPosition.up.x = camera.up.x;
-    cameraPosition.up.y = camera.up.y;
-    cameraPosition.up.z = camera.up.z;
-
-    cameraHolderPosition.rotation.x = cameraHolder.rotation.x;
-    cameraHolderPosition.rotation.y = cameraHolder.rotation.y;
-    cameraHolderPosition.rotation.z = cameraHolder.rotation.z;
-
-    cameraHolderPosition.position.x = cameraHolder.position.x;
-    cameraHolderPosition.position.y = cameraHolder.position.y;
-    cameraHolderPosition.position.z = cameraHolder.position.z;
-
-    aviao.position.set(0, -2, 5);
-    aviao.rotateZ(degreesToRadians(180))
-
-    cameraHolder.position.set(0, 0, 0);
-    cameraHolder.rotation.set(0, 0, 0);
-
-    camera.position.set(0, -500, 20);
-    camera.rotation.set(0, 0, 0);
-    camera.up.set(0, 1, 0);
-  } else {
-    aviao.position.set(
-      planePosition.position.x,
-      planePosition.position.y,
-      planePosition.position.z
-    );
-    aviao.rotation.set(
-      planePosition.rotation.x,
-      planePosition.rotation.y,
-      planePosition.rotation.z
-    );
-
-    cameraHolder.position.set(
-      cameraHolderPosition.position.x,
-      cameraHolderPosition.position.y,
-      cameraHolderPosition.position.z
-    );
-    cameraHolder.rotation.set(
-      cameraHolderPosition.rotation.x,
-      cameraHolderPosition.rotation.y,
-      cameraHolderPosition.rotation.z
-    );
-
-    camera.position.set(
-      cameraPosition.position.x,
-      cameraPosition.position.y,
-      cameraPosition.position.z
-    );
-    camera.rotation.set(
-      cameraPosition.rotation.x,
-      cameraPosition.rotation.y,
-      cameraPosition.rotation.z
-    );
-    camera.up.set(
-      cameraPosition.up.x,
-      cameraPosition.up.y,
-      cameraPosition.up.z
-    );
-  }
-}
 
 function cameraCockpit() {
   if (cockpit) {
@@ -276,10 +185,10 @@ function cameraCockpit() {
 const speed = 1.0; /* sets the initial speed */
 var mult = 5; /* sets initial speed multiplication */
 var movement = false; /* movement check */
-
 var angle = degreesToRadians(0.7); /* angle rotation */
 var angularSpeedVertical = 2;
 var angularSpeedHorizontal = 1;
+
 var animation = degreesToRadians(1);
 var modeCam2 = false;
 var started = false;
@@ -287,55 +196,47 @@ var started = false;
 async function keyboardUpdate() {
   keyboard.update();
 
-  if(modeCam2) {
+  if (modeCam2) {
     movement = false;
-    animation = 0;
-    angularSpeedHorizontal = 0;
-    angularSpeedVertical = 0;
-
     /* invisible secondaryBox */
-    speedBox.box.style.display = "none";
-    timeBox.box.style.display = "none";
-  }
-  else {
-    angularSpeedVertical = 3;
-    angularSpeedHorizontal = 1;
-    animation = degreesToRadians(1);
-
+    speedBox.box.style.display = 'none';
+    timeBox.box.style.display = 'none';
+  } else {
     /* visible secondaryBox */
-    speedBox.box.style.display = "block";
-    timeBox.box.style.display = "block";
+    speedBox.box.style.display = 'block';
+    timeBox.box.style.display = 'block';
   }
 
   var radiusCheckpoint = getRadius();
-  
+
   var inicioX = checkpoints[0].position.x;
   var inicioY = checkpoints[0].position.y;
   var inicioZ = checkpoints[0].position.z;
 
   var aviaoX = cameraHolder.position.x;
   var aviaoY = cameraHolder.position.y;
-  var aviaoZ = cameraHolder.position.z
+  var aviaoZ = cameraHolder.position.z;
 
-  if ((aviaoX > inicioX - radiusCheckpoint) && (aviaoX < inicioX + radiusCheckpoint) && 
-      (aviaoY > inicioY - radiusCheckpoint) && (aviaoY < inicioY + radiusCheckpoint) &&
-      (aviaoZ > inicioZ - radiusCheckpoint) && (aviaoZ < inicioZ + radiusCheckpoint)) 
-      {
-          started = true;
-          updateTime();
-      }
+  if (
+    aviaoX > inicioX - radiusCheckpoint &&
+    aviaoX < inicioX + radiusCheckpoint &&
+    aviaoY > inicioY - radiusCheckpoint &&
+    aviaoY < inicioY + radiusCheckpoint &&
+    aviaoZ > inicioZ - radiusCheckpoint &&
+    aviaoZ < inicioZ + radiusCheckpoint
+  ) {
+    started = true;
+    updateTime();
+  }
 
-  if(started)
-      updateTime();  
+  if (started) updateTime();
 
   if (keyboard.down('space')) {
     mult = 0;
-    changeCamera();
     sim = !sim;
     modeCam2 = !modeCam2;
 
-    if(!modeCam2)
-      mult = 5;
+    if (!modeCam2) mult = 5;
 
     /* remove all objects */
     sum.visible = !sum.visible;
@@ -352,7 +253,7 @@ async function keyboardUpdate() {
   }
 
   if (movement) {
-    aviao.translateY(0); 
+    aviao.translateY(0);
     cameraHolder.translateY(speed * mult);
   }
 
@@ -433,21 +334,8 @@ function render() {
   keyboardUpdate();
   requestAnimationFrame(render); // Show events
   if (sim) renderer.render(scene, camera);
-  else renderer.render(scene, camera2);
-
-  /* Ativar trackballs para melhor visualização do mapa todo */
-  //trackballControls.update();
+  else renderer.render(inspecScene, camera2);
 
   cameraCockpit();
-
-  if (!sim) {
-    trackballControls.enabled = true;
-    trackballControls.update();
-    groundPlane.visible = false;
-    axesHelper.visible = true;
-  } else {
-    groundPlane.visible = true;
-    axesHelper.visible = false;
-    trackballControls.enabled = false;
-  }
+  trackballControls.update();
 }
