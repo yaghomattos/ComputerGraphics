@@ -18,6 +18,11 @@ import { generateTrack } from './track.js';
 import { createCheckpoints } from './track.js';
 import { getRadius } from './track.js';
 
+import {OBJLoader} from '../build/jsm/loaders/OBJLoader.js';
+import {MTLLoader} from '../build/jsm/loaders/MTLLoader.js';
+
+var checkpointsCount = 0;
+
 var scene = new THREE.Scene(); // Create main scene
 var stats = new Stats(); // To show FPS information
 var renderer = initRenderer(); // View function in util/utils
@@ -87,7 +92,7 @@ var sum = createLightSphere(
 );
 scene.add(sum);
 
-var dirLight = new THREE.DirectionalLight('rgb(255,255,150)');
+var dirLight = new THREE.DirectionalLight("rgb(255,255,150)");
 dirLight.position.copy(new THREE.Vector3(10000, 25000, 5000));
 dirLight.shadow.bias = 0.0001;
 dirLight.shadow.mapSize.width = 2048;
@@ -99,19 +104,14 @@ dirLight.shadow.camera.top = 200;
 dirLight.shadow.camera.bottom = -200;
 scene.add(dirLight);
 
+
 var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
 scene.add(light);
 
 /**
  * wireframe plan
  */
-var groundPlane = createGroundPlaneWired(
-  50000,
-  50000,
-  100,
-  100,
-  'rgb(70,70,90)'
-);
+var groundPlane = createGroundPlaneWired(50000, 50000, 100, 100, "rgb(70,70,90)");
 groundPlane.rotateX(degreesToRadians(90));
 scene.add(groundPlane);
 
@@ -136,6 +136,13 @@ for (let i = 0; i < checkpoints.length; i++) {
 }
 
 /**
+ * cenario
+ */
+var cenario;
+
+loadOBJFile("./assets", "/cenario", 10, 0, true, cenario);
+
+/**
  * simple object to controll camera
  */
 var cameraHolder = new THREE.Object3D();
@@ -154,9 +161,6 @@ maxSpeedBox.box.style.display = 'none';
 
 var timeBox = new SecondaryBox('');
 timeBox.box.style.bottom = '50px';
-
-var checkBox = new SecondaryBox('');
-checkBox.box.style.bottom = '100px';
 
 var keyboard = new KeyboardState();
 
@@ -183,10 +187,6 @@ function updateSpeed() {
   }
 }
 
-function updateCheckedpoint() {
-  checkBox.changeMessage('Checkpoint: ' + (checkpointsCount / 9).toFixed(0));
-}
-
 var sim = true;
 var cockpit = false;
 
@@ -206,8 +206,6 @@ var animation = degreesToRadians(1);
 var modeCam2 = false;
 var started = false;
 
-var checkpointsCount = 0;
-
 async function keyboardUpdate() {
   keyboard.update();
 
@@ -226,35 +224,44 @@ async function keyboardUpdate() {
 
   var radiusCheckpoint = getRadius();
 
-  for (var i = 0; i < checkpoints.length; i++) {
+
+  for (var i=0; i < checkpoints.length; i++)
+  {
     var inicioX = checkpoints[i].position.x;
     var inicioY = checkpoints[i].position.y;
     var inicioZ = checkpoints[i].position.z;
-
+    
     var aviaoX = cameraHolder.position.x;
     var aviaoY = cameraHolder.position.y;
     var aviaoZ = cameraHolder.position.z;
-
-    if (
-      aviaoX > inicioX - radiusCheckpoint &&
-      aviaoX < inicioX + radiusCheckpoint &&
-      aviaoY > inicioY - radiusCheckpoint &&
-      aviaoY < inicioY + radiusCheckpoint &&
-      aviaoZ > inicioZ - radiusCheckpoint &&
-      aviaoZ < inicioZ + radiusCheckpoint
-    ) {
-      if (i == 0) {
-        started = true;
-        updateTime();
-        checkpointsCount++;
+    
+    if (aviaoX > inicioX - radiusCheckpoint &&
+        aviaoX < inicioX + radiusCheckpoint &&
+        aviaoY > inicioY - radiusCheckpoint &&
+        aviaoY < inicioY + radiusCheckpoint &&
+        aviaoZ > inicioZ - radiusCheckpoint &&
+        aviaoZ < inicioZ + radiusCheckpoint
+      )
+      {
+        if(i == 0) {
+          started = true;
+          updateTime();
+          if(checkpoints[i].visible == true)
+          {
+          checkpointsCount++;
+          console.log(checkpointsCount)
+        }
+          checkpoints[i].visible = false;
+        }
+        else {
+          if(checkpoints[i].visible == true)
+          {
+          checkpointsCount++;
+          console.log(checkpointsCount)
+        }
         checkpoints[i].visible = false;
-        updateCheckedpoint();
-      } else {
-        checkpoints[i].visible = false;
-        checkpointsCount++;
-        updateCheckedpoint();
-      }
-    }
+        }
+      }     
   }
 
   if (started) updateTime();
@@ -346,9 +353,56 @@ function showInformation() {
   controls.add('A to speed down');
   controls.add('Up/Down arrow to elevator');
   controls.add('Left / Right arrow to turn');
-  controls.add('Enter to show/hide track');
+  controls.add('Enter to show/hide track');  
   controls.show();
 }
+
+
+
+function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility, addTo)
+{
+  var manager = new THREE.LoadingManager( );
+
+  var mtlLoader = new MTLLoader( manager );
+  mtlLoader.setPath( modelPath );
+  mtlLoader.load( modelName + '.mtl', function ( materials ) {
+      materials.preload();
+
+      var objLoader = new OBJLoader( manager );
+      objLoader.setMaterials(materials);
+      objLoader.setPath(modelPath);
+      objLoader.load( modelName + ".obj", function ( obj ) {
+        obj.visible = visibility;
+        obj.name = modelName;
+        // Set 'castShadow' property for each children of the group
+        obj.traverse( function (child)
+        {
+          child.castShadow = true;
+        });
+
+        obj.traverse( function( node )
+        {
+          if( node.material ) node.material.side = THREE.DoubleSide;
+        });
+
+        var obj = normalizeAndRescale(obj, desiredScale);
+        var obj = fixPosition(obj);
+        obj.rotateY(degreesToRadians(angle));
+
+        addTo.add( obj );
+        scene.add ( addTo );
+        
+      }, onProgress, onError );
+  });
+}
+
+
+function onError() { };
+
+function onProgress ( ) {
+ console.log("carregando");
+}
+
 
 function render() {
   stats.update(); // Update FPS
