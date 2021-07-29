@@ -21,7 +21,7 @@ import { getRadius } from './track.js';
 var scene = new THREE.Scene(); // Create main scene
 var stats = new Stats(); // To show FPS information
 var renderer = initRenderer(); // View function in util/utils
-renderer.setClearColor('rgb(30, 30, 40)');
+renderer.setClearColor('rgb(135, 206, 235)');
 
 var camera = new THREE.PerspectiveCamera(
   45,
@@ -89,6 +89,7 @@ scene.add(sum);
 
 var dirLight = new THREE.DirectionalLight("rgb(255,255,150)");
 dirLight.position.copy(new THREE.Vector3(10000, 25000, 5000));
+dirLight.shadow.bias = 0.0001;
 dirLight.shadow.mapSize.width = 2048;
 dirLight.shadow.mapSize.height = 2048;
 dirLight.castShadow = true;
@@ -98,13 +99,14 @@ dirLight.shadow.camera.top = 200;
 dirLight.shadow.camera.bottom = -200;
 scene.add(dirLight);
 
-var light = new THREE.HemisphereLight();
+
+var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
 scene.add(light);
 
 /**
  * wireframe plan
  */
-var groundPlane = createGroundPlaneWired(50000, 50000, 100, 100, "rgb(80,80,80)");
+var groundPlane = createGroundPlaneWired(50000, 50000, 100, 100, "rgb(80,85,90)");
 groundPlane.rotateX(degreesToRadians(90));
 scene.add(groundPlane);
 
@@ -294,7 +296,6 @@ async function keyboardUpdate() {
     aviao.rotation.y >= degreesToRadians(-1)
   ) {
     cameraHolder.rotateZ(-angularSpeedHorizontal);
-    console.log(angularSpeedHorizontal)
     if (aviao.rotation.y <= degreesToRadians(35)) {
       aviao.rotation.y += animation;
     }
