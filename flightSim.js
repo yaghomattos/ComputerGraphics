@@ -425,7 +425,7 @@ function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility)
         if(modelName == "cenario"){
           console.log("começando a adicionar")
           obj.rotateX(Math.PI/2);
-          obj.rotateY(Math.PI/4);
+          obj.rotateY(Math.PI/3);
           scene.add ( obj );
           console.log("adicionado à cena")
         }
