@@ -162,6 +162,9 @@ maxSpeedBox.box.style.display = 'none';
 var timeBox = new SecondaryBox('');
 timeBox.box.style.bottom = '50px';
 
+var checkBox = new SecondaryBox('');
+checkBox.box.style.bottom = '100px';
+
 var keyboard = new KeyboardState();
 
 render();
@@ -170,7 +173,9 @@ render();
 var timer = new THREE.Clock();
 var delta = 0;
 
-function updateTime() {
+function updateTime(stop) {
+  if(latest)
+    timer.stop();
   delta += timer.getDelta();
   timeBox.changeMessage(' Time: ' + delta.toFixed(2));
 }
@@ -185,6 +190,10 @@ function updateSpeed() {
     maxSpeedBox.changeMessage('');
     maxSpeedBox.box.style.display = 'none';
   }
+}
+
+function updateCheckedpoint() {
+  checkBox.changeMessage('Checkpoint: ' + checkpointsCount);
 }
 
 var sim = true;
@@ -205,6 +214,8 @@ var angularSpeedHorizontal = 0.015;
 var animation = degreesToRadians(1);
 var modeCam2 = false;
 var started = false;
+
+var latest = false;
 
 async function keyboardUpdate() {
   keyboard.update();
@@ -249,7 +260,7 @@ async function keyboardUpdate() {
           if(checkpoints[i].visible == true)
           {
           checkpointsCount++;
-          console.log(checkpointsCount)
+          updateCheckedpoint();
         }
           checkpoints[i].visible = false;
         }
@@ -257,11 +268,15 @@ async function keyboardUpdate() {
           if(checkpoints[i].visible == true)
           {
           checkpointsCount++;
-          console.log(checkpointsCount)
+          updateCheckedpoint();
         }
         checkpoints[i].visible = false;
         }
-      }     
+      } 
+      if(!checkpoints[12].visible && !latest) {
+        updateTime(stop);
+        latest = true;
+      }
   }
 
   if (started) updateTime();
