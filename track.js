@@ -28,9 +28,10 @@ export function generateTrack() {
   return curveObject;
 }
 
-function generateTorus(cor) {
+function generateTorus(cor1, cor2, cor3) {
   const geometry = new THREE.TorusGeometry(25, 4, 10, 50);
-  const material =  new THREE.MeshPhongMaterial( { color: cor, opacity: 0.8 , transparent: true } ); 
+  const material =  new THREE.MeshPhongMaterial( { opacity: 0.8 , transparent: true } ); 
+  material.color.setRGB(cor1, cor2, cor3);
   const torus = new THREE.Mesh(geometry, material);
   return torus;
 }
@@ -39,15 +40,14 @@ export function createCheckpoints() {
   var checkpoint = [];
 
   
-  for (var i=1, j=0; i < curveTrackPoints.length - 1; i++, j++){
-    
+  for (var i=1, j=0; i < curveTrackPoints.length - 1; i++, j++){   
 
     var color = new THREE.Color();
     color.r = (Math.min(0.9, (0.1 + j*0.9/curveTrackPoints.length)));
     color.g = (Math.max(0, (0.9 - j*1.3/curveTrackPoints.length)));
     color.b = 0.3
 
-    checkpoint[j] = generateTorus(color);
+    checkpoint[j] = generateTorus(color.r, color.g, color.b);
     if(i == curveTrackPoints.length - 2)
     {
       checkpoint[j].position.x = 100;

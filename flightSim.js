@@ -211,25 +211,37 @@ async function keyboardUpdate() {
   }
 
   var radiusCheckpoint = getRadius();
+  var checkpointsCount = 0;
 
-  var inicioX = checkpoints[0].position.x;
-  var inicioY = checkpoints[0].position.y;
-  var inicioZ = checkpoints[0].position.z;
-
-  var aviaoX = cameraHolder.position.x;
-  var aviaoY = cameraHolder.position.y;
-  var aviaoZ = cameraHolder.position.z;
-
-  if (
-    aviaoX > inicioX - radiusCheckpoint &&
-    aviaoX < inicioX + radiusCheckpoint &&
-    aviaoY > inicioY - radiusCheckpoint &&
-    aviaoY < inicioY + radiusCheckpoint &&
-    aviaoZ > inicioZ - radiusCheckpoint &&
-    aviaoZ < inicioZ + radiusCheckpoint
-  ) {
-    started = true;
-    updateTime();
+  for (var i=0; i < checkpoints.length; i++)
+  {
+    var inicioX = checkpoints[i].position.x;
+    var inicioY = checkpoints[i].position.y;
+    var inicioZ = checkpoints[i].position.z;
+    
+    var aviaoX = cameraHolder.position.x;
+    var aviaoY = cameraHolder.position.y;
+    var aviaoZ = cameraHolder.position.z;
+    
+    if (aviaoX > inicioX - radiusCheckpoint &&
+        aviaoX < inicioX + radiusCheckpoint &&
+        aviaoY > inicioY - radiusCheckpoint &&
+        aviaoY < inicioY + radiusCheckpoint &&
+        aviaoZ > inicioZ - radiusCheckpoint &&
+        aviaoZ < inicioZ + radiusCheckpoint
+      )
+      {
+        if(i == 0) {
+          started = true;
+          updateTime();
+          checkpointsCount++;
+          checkpoints[i].visible = false;
+        }
+        else {
+          checkpoints[i].visible = false;
+          checkpointsCount++;
+        }
+      }     
   }
 
   if (started) updateTime();
@@ -316,10 +328,12 @@ function showInformation() {
   controls.add('Controls');
   controls.addParagraph();
   controls.add('Space to change camera mode');
+  controls.add('C for cockpit camera');
   controls.add('Q to speed up');
   controls.add('A to speed down');
   controls.add('Up/Down arrow to elevator');
   controls.add('Left / Right arrow to turn');
+  controls.add('Enter to show/hide track');  
   controls.show();
 }
 
@@ -329,7 +343,6 @@ function render() {
   requestAnimationFrame(render); // Show events
   if (sim) renderer.render(scene, camera);
   else renderer.render(inspecScene, camera2);
-
   cameraCockpit();
   trackballControls.update();
 }
