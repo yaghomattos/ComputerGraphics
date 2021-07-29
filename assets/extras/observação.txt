@@ -1,0 +1,5 @@
+O arquivo "14 bis - 1" é o modelo original, em escala real.
+O arquivo "14 bis - 2" é o modelo em escala 2x.
+O arquivo ativo está na escala 4x, pois o tamanho fica mais compatível com o restante do trabalho (que foi feito antes do modelo)
+
+Para utilizar uma das outras escalas, basta mover os arquivos correspondentes para a pasta "assets" e renomear para "14 bis"
