@@ -118,9 +118,15 @@ scene.add(groundPlane);
 /**
  * airplane
  */
+/*
 var aviao = gerarAviao();
 aviao.translateZ(2);
 aviao.translateY(5);
+*/
+
+var aviao = new THREE.Object3D();
+
+loadOBJFile("./assets/", "14 bis", 2, 0, true, aviao);
 
 /**
  * Track
@@ -140,7 +146,7 @@ for (let i = 0; i < checkpoints.length; i++) {
  */
 var cenario;
 
-loadOBJFile("./assets", "/cenario", 10, 0, true, cenario);
+loadOBJFile("./assets/", "cenario", 2, 0, true, cenario);
 
 /**
  * simple object to controll camera
@@ -374,38 +380,66 @@ function showInformation() {
 
 
 
-function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility, addTo)
+function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility)
 {
+  console.log("começando")
   var manager = new THREE.LoadingManager( );
 
   var mtlLoader = new MTLLoader( manager );
   mtlLoader.setPath( modelPath );
   mtlLoader.load( modelName + '.mtl', function ( materials ) {
       materials.preload();
+      console.log("materiais carregados")
 
       var objLoader = new OBJLoader( manager );
       objLoader.setMaterials(materials);
       objLoader.setPath(modelPath);
       objLoader.load( modelName + ".obj", function ( obj ) {
+        console.log("objeto carregado, sendo processado")
         obj.visible = visibility;
         obj.name = modelName;
         // Set 'castShadow' property for each children of the group
         obj.traverse( function (child)
         {
-          child.castShadow = true;
+          console.log("carregando...")
+          child.castShadow = false;
         });
 
         obj.traverse( function( node )
         {
+          console.log("carregando(2)...")
           if( node.material ) node.material.side = THREE.DoubleSide;
         });
+        console.log("finalizado")
 
+        /*
         var obj = normalizeAndRescale(obj, desiredScale);
+        console.log("1")
         var obj = fixPosition(obj);
+        console.log("2")
         obj.rotateY(degreesToRadians(angle));
+        */
+        console.log("obj: ")
+        console.log(obj);
 
-        addTo.add( obj );
-        scene.add ( addTo );
+        if(modelName == "cenario"){
+          console.log("começando a adicionar")
+          obj.rotateX(Math.PI/2);
+          obj.rotateY(Math.PI/4);
+          scene.add ( obj );
+          console.log("adicionado à cena")
+        }
+        if(modelName == "14 bis")
+        {
+        console.log("adicionando ao objeto") 
+        aviao.add(obj);
+        obj.rotateX(Math.PI/2);
+        obj.rotateY(Math.PI/2);
+//        obj.rotateZ(Math.PI/2);
+        console.log("adicionado")
+
+        }
+        
         
       }, onProgress, onError );
   });
@@ -415,7 +449,7 @@ function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility, addT
 function onError() { };
 
 function onProgress ( ) {
- console.log("carregando");
+
 }
 
 
