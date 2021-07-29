@@ -30,7 +30,7 @@ export function generateTrack() {
 
 function generateTorus(cor) {
   const geometry = new THREE.TorusGeometry(25, 4, 10, 50);
-  const material =  new THREE.MeshBasicMaterial( { color: cor, opacity: 0.8 , transparent: true } ); 
+  const material =  new THREE.MeshPhongMaterial( { color: cor, opacity: 0.8 , transparent: true } ); 
   const torus = new THREE.Mesh(geometry, material);
   return torus;
 }

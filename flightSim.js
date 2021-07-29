@@ -106,7 +106,7 @@ scene.add(light);
 /**
  * wireframe plan
  */
-var groundPlane = createGroundPlaneWired(50000, 50000, 100, 100, "rgb(80,85,90)");
+var groundPlane = createGroundPlaneWired(50000, 50000, 100, 100, "rgb(70,70,90)");
 groundPlane.rotateX(degreesToRadians(90));
 scene.add(groundPlane);
 
@@ -187,7 +187,6 @@ function cameraCockpit() {
 const speed = 1.0; /* sets the initial speed */
 var mult = 5; /* sets initial speed multiplication */
 var movement = false; /* movement check */
-var angle = degreesToRadians(0.3); /* angle rotation */
 var angularSpeedVertical = 2;
 var angularSpeedHorizontal = 0.015;
 
@@ -203,10 +202,12 @@ async function keyboardUpdate() {
     /* invisible secondaryBox */
     speedBox.box.style.display = 'none';
     timeBox.box.style.display = 'none';
+    maxSpeedBox.box.style.display = 'none';
   } else {
     /* visible secondaryBox */
     speedBox.box.style.display = 'block';
     timeBox.box.style.display = 'block';
+    maxSpeedBox.box.style.display = 'block';
   }
 
   var radiusCheckpoint = getRadius();
