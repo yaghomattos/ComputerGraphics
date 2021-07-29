@@ -16,9 +16,7 @@ export function gerarAviao(){
 
 function gerarCorpo(){
   var cilindroGeometry = new THREE.CylinderGeometry(1,1,10,32);
-  var cilindroMaterial = new THREE.MeshPhongMaterial({
-    shininess: 100
-  });
+  var cilindroMaterial = new THREE.MeshPhongMaterial();
   setColor(cilindroMaterial);
 
   var cilindro1 = new THREE.Mesh(cilindroGeometry, cilindroMaterial);
@@ -37,9 +35,7 @@ function gerarCauda(){
     aux2 = aux1*(Math.pow(factor,1.5*i))
 
     var coneGeometry = new THREE.CylinderGeometry(aux1, aux2,seg,32);
-    var coneMaterial = new THREE.MeshPhongMaterial({
-      shininess: 100   
-    });
+    var coneMaterial = new THREE.MeshPhongMaterial();
     setColor(coneMaterial);
 
     var cone = new THREE.Mesh(coneGeometry, coneMaterial);
@@ -62,9 +58,7 @@ function gerarCabine(){
     aux2 = aux1*(Math.pow(factor,1.5*i))
 
     var coneGeometry = new THREE.CylinderGeometry(aux1, aux2,seg,32);
-    var coneMaterial = new THREE.MeshPhongMaterial({
-      shininess: 100     
-    });
+    var coneMaterial = new THREE.MeshPhongMaterial();
     setColor(coneMaterial);
 
     var cone = new THREE.Mesh(coneGeometry, coneMaterial);
@@ -87,9 +81,7 @@ function gerarCabine(){
 
   var bicoGeometry = new THREE.LatheGeometry(curva, 32);
 
-  var bicoMaterial = new THREE.MeshPhongMaterial({
-    shininess: 10000
-  });
+  var bicoMaterial = new THREE.MeshPhongMaterial();
   setColor(bicoMaterial);
   var bico = new THREE.Mesh(bicoGeometry, bicoMaterial);
   bico.translateY((5+count*seg));
@@ -116,9 +108,7 @@ function gerarLeme() {
   };
   
   var lemeGeometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
-  var lemeMaterial = new THREE.MeshPhongMaterial({
-    shininess: 100
-  });
+  var lemeMaterial = new THREE.MeshPhongMaterial();
   setColor(lemeMaterial);
 
   var leme = new THREE.Mesh( lemeGeometry, lemeMaterial ) ;
@@ -152,9 +142,7 @@ function gerarEstab() {
   };
   
   var estabGeometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
-  var estabMaterial = new THREE.MeshPhongMaterial({
-    shininess: 100
-  });
+  var estabMaterial = new THREE.MeshPhongMaterial();
   setColor(estabMaterial);
 
   var estab = new THREE.Mesh( estabGeometry, estabMaterial ) ;
@@ -186,9 +174,7 @@ function gerarAsa() {
   };
   
   var asaGeometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
-  var asaMaterial = new THREE.MeshPhongMaterial({
-    shininess: 100
-  });
+  var asaMaterial = new THREE.MeshPhongMaterial();
   setColor(asaMaterial);
   var asa = new THREE.Mesh( asaGeometry, asaMaterial ) ;
 
@@ -222,45 +208,35 @@ function gerarTurbina(){
   var turbina = new THREE.Object3D();
   
   var cylinderGeometry1 = new THREE.CylinderGeometry(0.5, 0.6,0.7,32);
-  var cylinderMaterial1 = new THREE.MeshPhongMaterial({
-    shininess: 100
-  });
+  var cylinderMaterial1 = new THREE.MeshPhongMaterial();
   setColor(cylinderMaterial1);
   var cylinder1 = new THREE.Mesh(cylinderGeometry1, cylinderMaterial1);
   cylinder1.translateY(0.35);
   turbina.add(cylinder1);
 
   var cylinderGeometry2 = new THREE.CylinderGeometry(0.6, 0.5,0.7,32);
-  var cylinderMaterial2 = new THREE.MeshPhongMaterial({
-    shininess: 100
-  });
+  var cylinderMaterial2 = new THREE.MeshPhongMaterial();
   setColor(cylinderMaterial2);
   var cylinder2 = new THREE.Mesh(cylinderGeometry2, cylinderMaterial2);
   cylinder2.translateY(-0.35);
   turbina.add(cylinder2);
 
   var cylinderGeometry3 = new THREE.CylinderGeometry(0.3, 0.4,0.4,32);
-  var cylinderMaterial3 = new THREE.MeshPhongMaterial({
-    shininess: 100
-  });
+  var cylinderMaterial3 = new THREE.MeshPhongMaterial();
   setColor(cylinderMaterial3);
   var cylinder3 = new THREE.Mesh(cylinderGeometry3, cylinderMaterial3);
   cylinder3.translateY(0.9);
   turbina.add(cylinder3);
 
   var cylinderGeometry4 = new THREE.CylinderGeometry(0, 0.2,0.3,32);
-  var cylinderMaterial4= new THREE.MeshPhongMaterial({
-    shininess: 100
-  });
+  var cylinderMaterial4= new THREE.MeshPhongMaterial();
   setColor(cylinderMaterial4);
   var cylinder4 = new THREE.Mesh(cylinderGeometry4, cylinderMaterial4);
   cylinder4.translateY(1.25);
   turbina.add(cylinder4);
 
   var suporteGeometry = new THREE.BoxGeometry(0.2,0.8,0.8);
-  var suporteMaterial = new THREE.MeshPhongMaterial({
-    shininess: 100
-  });
+  var suporteMaterial = new THREE.MeshPhongMaterial();
   setColor(suporteMaterial);
   var suporte = new THREE.Mesh(suporteGeometry, suporteMaterial);
   suporte.translateZ(-0.5)
@@ -271,5 +247,6 @@ function gerarTurbina(){
 
 function setColor(material)
 {
-  material.color.setRGB(1, 1, 255);
+  material.color.setRGB(1, 1, 250);
+  material.shininess = 1000;
 }
