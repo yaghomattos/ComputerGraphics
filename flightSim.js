@@ -337,7 +337,7 @@ async function keyboardUpdate() {
   if (keyboard.pressed('left') && aviao.rotation.y <= degreesToRadians(1)) {
     cameraHolder.rotateZ(angularSpeedHorizontal * mult);
     if (aviao.rotation.y >= degreesToRadians(-25)) {
-      aviao.rotation.y -= animation;
+      aviao.rotation.y -= animation * mult;
     }
   } else if (
     keyboard.pressed('right') &&
@@ -345,7 +345,7 @@ async function keyboardUpdate() {
   ) {
     cameraHolder.rotateZ(-angularSpeedHorizontal * mult);
     if (aviao.rotation.y <= degreesToRadians(25)) {
-      aviao.rotation.y += animation;
+      aviao.rotation.y += animation * mult;
     }
   } else {
     if (aviao.rotation.y > 0 && aviao.rotation.y <= degreesToRadians(40)) {
@@ -433,6 +433,7 @@ function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility)
         aviaoInspec.copy(aviao, true);
         obj.rotateX(Math.PI/2);
         obj.rotateY(Math.PI/2);
+        obj.translateY(6)
 //        obj.rotateZ(Math.PI/2);
         console.log("adicionado")
 
