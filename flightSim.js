@@ -112,7 +112,7 @@ scene.add(light);
 /**
  * wireframe plan
  */
-var groundPlane = createGroundPlaneWired(50000, 50000, 100, 100, "rgb(70,70,90)");
+var groundPlane = createGroundPlaneWired(50000, 50000, 100, 100, "rgb(34,139,34)");
 groundPlane.rotateX(degreesToRadians(90));
 scene.add(groundPlane);
 
