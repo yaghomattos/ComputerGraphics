@@ -17,8 +17,8 @@ import { generateTrack } from './track.js';
 import { createCheckpoints } from './track.js';
 import { getRadius } from './track.js';
 
-import {OBJLoader} from '../build/jsm/loaders/OBJLoader.js';
-import {MTLLoader} from '../build/jsm/loaders/MTLLoader.js';
+import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
+import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
 
 var checkpointsCount = 0;
 
@@ -59,7 +59,6 @@ planeInspec.add(aviaoInspec);
 planeInspec.position.set(0, 0, 0);
 inspecScene.add(planeInspec);
 
-
 var trackballControls = new TrackballControls(camera2, renderer.domElement);
 
 // Listen window size changes
@@ -89,7 +88,7 @@ var sum = createLightSphere(
 );
 scene.add(sum);
 
-var dirLight = new THREE.DirectionalLight("rgb(255,255,150)");
+var dirLight = new THREE.DirectionalLight('rgb(255,255,150)');
 dirLight.position.copy(new THREE.Vector3(10000, 25000, 5000));
 dirLight.shadow.bias = 0.0001;
 dirLight.shadow.mapSize.width = 2048;
@@ -101,14 +100,19 @@ dirLight.shadow.camera.top = 200;
 dirLight.shadow.camera.bottom = -200;
 scene.add(dirLight);
 
-
 var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
 scene.add(light);
 
 /**
  * wireframe plan
  */
-var groundPlane = createGroundPlaneWired(50000, 50000, 100, 100, "rgb(34,139,34)");
+var groundPlane = createGroundPlaneWired(
+  50000,
+  50000,
+  100,
+  100,
+  'rgb(34,139,34)'
+);
 groundPlane.rotateX(degreesToRadians(90));
 scene.add(groundPlane);
 
@@ -116,10 +120,9 @@ scene.add(groundPlane);
  * airplane
  */
 var aviao = new THREE.Object3D();
-aviao.position.set(0,0,2);
+aviao.position.set(0, 0, 2);
 
-loadOBJFile("./assets/", "14 bis", 2, 0, true, aviao);
-
+loadOBJFile('./assets/', '14 bis', 2, 0, true, aviao);
 
 /**
  * Track
@@ -139,7 +142,7 @@ for (let i = 0; i < checkpoints.length; i++) {
  */
 var cenario;
 
-loadOBJFile("./assets/", "cenario", 2, 0, true, cenario);
+loadOBJFile('./assets/', 'cenario', 2, 0, true, cenario);
 
 /**
  * simple object to controll camera
@@ -173,15 +176,14 @@ var timer = new THREE.Clock();
 var delta = 0;
 
 function updateTime(stop) {
-  if(latest)
-    timer.stop();
+  if (latest) timer.stop();
   delta += timer.getDelta();
   timeBox.changeMessage(' Time: ' + delta.toFixed(2));
 }
 
 /* message speed */
 function updateSpeed() {
-  speedBox.changeMessage('Speed: ' + (Math.pow(mult, 2)).toFixed(0) + ' km/h');
+  speedBox.changeMessage('Speed: ' + Math.pow(mult, 2).toFixed(0) + ' km/h');
   if (Math.pow(mult, 2) > 41) {
     maxSpeedBox.changeMessage('MAX');
     maxSpeedBox.box.style.display = 'block';
@@ -236,47 +238,43 @@ async function keyboardUpdate() {
 
   var radiusCheckpoint = getRadius();
 
-  for (var i=0; i < checkpoints.length; i++)
-  {
+  for (var i = 0; i < checkpoints.length; i++) {
     var inicioX = checkpoints[i].position.x;
     var inicioY = checkpoints[i].position.y;
     var inicioZ = checkpoints[i].position.z;
-    
+
     var aviaoX = cameraHolder.position.x;
     var aviaoY = cameraHolder.position.y;
     var aviaoZ = cameraHolder.position.z;
-    
-    if (aviaoX > inicioX - radiusCheckpoint &&
-        aviaoX < inicioX + radiusCheckpoint &&
-        aviaoY > inicioY - radiusCheckpoint &&
-        aviaoY < inicioY + radiusCheckpoint &&
-        aviaoZ > inicioZ - radiusCheckpoint &&
-        aviaoZ < inicioZ + radiusCheckpoint
-      )
-      {
-        if(i == 0) {
-          started = true;
-          updateTime();
-          if(checkpoints[i].visible == true)
-          {
-          checkpointsCount++;
-          updateCheckedpoint();
-        }
-          checkpoints[i].visible = false;
-        }
-        else {
-          if(checkpoints[i].visible == true)
-          {
+
+    if (
+      aviaoX > inicioX - radiusCheckpoint &&
+      aviaoX < inicioX + radiusCheckpoint &&
+      aviaoY > inicioY - radiusCheckpoint &&
+      aviaoY < inicioY + radiusCheckpoint &&
+      aviaoZ > inicioZ - radiusCheckpoint &&
+      aviaoZ < inicioZ + radiusCheckpoint
+    ) {
+      if (i == 0) {
+        started = true;
+        updateTime();
+        if (checkpoints[i].visible == true) {
           checkpointsCount++;
           updateCheckedpoint();
         }
         checkpoints[i].visible = false;
+      } else {
+        if (checkpoints[i].visible == true) {
+          checkpointsCount++;
+          updateCheckedpoint();
         }
-      } 
-      if(!checkpoints[12].visible && !latest) {
-        updateTime(stop);
-        latest = true;
+        checkpoints[i].visible = false;
       }
+    }
+    if (!checkpoints[12].visible && !latest) {
+      updateTime(stop);
+      latest = true;
+    }
   }
 
   if (started) updateTime();
@@ -368,43 +366,40 @@ function showInformation() {
   controls.add('A to speed down');
   controls.add('Up/Down arrow to elevator');
   controls.add('Left / Right arrow to turn');
-  controls.add('Enter to show/hide track');  
+  controls.add('Enter to show/hide track');
   controls.show();
 }
 
+function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility) {
+  console.log('começando');
+  var manager = new THREE.LoadingManager();
 
+  var mtlLoader = new MTLLoader(manager);
+  mtlLoader.setPath(modelPath);
+  mtlLoader.load(modelName + '.mtl', function (materials) {
+    materials.preload();
+    console.log('materiais carregados');
 
-function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility)
-{
-  console.log("começando")
-  var manager = new THREE.LoadingManager( );
-
-  var mtlLoader = new MTLLoader( manager );
-  mtlLoader.setPath( modelPath );
-  mtlLoader.load( modelName + '.mtl', function ( materials ) {
-      materials.preload();
-      console.log("materiais carregados")
-
-      var objLoader = new OBJLoader( manager );
-      objLoader.setMaterials(materials);
-      objLoader.setPath(modelPath);
-      objLoader.load( modelName + ".obj", function ( obj ) {
-        console.log("objeto carregado, sendo processado")
+    var objLoader = new OBJLoader(manager);
+    objLoader.setMaterials(materials);
+    objLoader.setPath(modelPath);
+    objLoader.load(
+      modelName + '.obj',
+      function (obj) {
+        console.log('objeto carregado, sendo processado');
         obj.visible = visibility;
         obj.name = modelName;
         // Set 'castShadow' property for each children of the group
-        obj.traverse( function (child)
-        {
-          console.log("carregando...")
+        obj.traverse(function (child) {
+          console.log('carregando...');
           child.castShadow = false;
         });
 
-        obj.traverse( function( node )
-        {
-          console.log("carregando(2)...")
-          if( node.material ) node.material.side = THREE.DoubleSide;
+        obj.traverse(function (node) {
+          console.log('carregando(2)...');
+          if (node.material) node.material.side = THREE.DoubleSide;
         });
-        console.log("finalizado")
+        console.log('finalizado');
 
         /*
         var obj = normalizeAndRescale(obj, desiredScale);
@@ -413,44 +408,39 @@ function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility)
         console.log("2")
         obj.rotateY(degreesToRadians(angle));
         */
-        console.log("obj: ")
+        console.log('obj: ');
         console.log(obj);
 
-        if(modelName == "cenario"){
-          console.log("começando a adicionar")
-          obj.rotateX(Math.PI/2);
-          obj.rotateY(-Math.PI*2/3 + Math.PI/2 - Math.PI/6);
+        if (modelName == 'cenario') {
+          console.log('começando a adicionar');
+          obj.rotateX(Math.PI / 2);
+          obj.rotateY((-Math.PI * 2) / 3 + Math.PI / 2 - Math.PI / 6);
           obj.translateZ(-600);
           obj.translateX(-200);
-          scene.add ( obj );
-          console.log("adicionado à cena")
+          scene.add(obj);
+          console.log('adicionado à cena');
         }
-        if(modelName == "14 bis")
-        {
-        console.log("adicionando ao objeto") 
-        aviao.add(obj);
-        console.log("adicionando ao modelo de inspeção")
-        aviaoInspec.copy(aviao, true);
-        obj.rotateX(Math.PI/2);
-        obj.rotateY(Math.PI/2);
-        obj.translateY(6)
-//        obj.rotateZ(Math.PI/2);
-        console.log("adicionado")
-
+        if (modelName == '14 bis') {
+          console.log('adicionando ao objeto');
+          aviao.add(obj);
+          console.log('adicionando ao modelo de inspeção');
+          aviaoInspec.copy(aviao, true);
+          obj.rotateX(Math.PI / 2);
+          obj.rotateY(Math.PI / 2);
+          obj.translateX(6);
+          //        obj.rotateZ(Math.PI/2);
+          console.log('adicionado');
         }
-        
-        
-      }, onProgress, onError );
+      },
+      onProgress,
+      onError
+    );
   });
 }
 
+function onError() {}
 
-function onError() { };
-
-function onProgress ( ) {
-
-}
-
+function onProgress() {}
 
 function render() {
   stats.update(); // Update FPS
