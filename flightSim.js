@@ -55,7 +55,7 @@ camera2.up.set(0.0, 1.0, 0.0);
 var inspecScene = new THREE.Scene();
 initDefaultBasicLight(inspecScene);
 
-var aviaoInspec = gerarAviao();
+var aviaoInspec = new THREE.Object3D();
 aviaoInspec.rotateZ(degreesToRadians(180));
 var planeInspec = new THREE.Object3D();
 planeInspec.add(aviaoInspec);
@@ -429,6 +429,8 @@ function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility)
         {
         console.log("adicionando ao objeto") 
         aviao.add(obj);
+        console.log("adicionando ao modelo de inspeção")
+        aviaoInspec.copy(aviao, true);
         obj.rotateX(Math.PI/2);
         obj.rotateY(Math.PI/2);
          obj.translateY(6);
