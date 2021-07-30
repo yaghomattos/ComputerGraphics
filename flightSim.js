@@ -63,6 +63,7 @@ planeInspec.position.set(0, 0, 0);
 
 inspecScene.add(planeInspec);
 
+
 var trackballControls = new TrackballControls(camera2, renderer.domElement);
 
 // Listen window size changes
@@ -118,12 +119,6 @@ scene.add(groundPlane);
 /**
  * airplane
  */
-/*
-var aviao = gerarAviao();
-aviao.translateZ(2);
-aviao.translateY(5);
-*/
-
 var aviao = new THREE.Object3D();
 
 loadOBJFile("./assets/", "14 bis", 2, 0, true, aviao);
@@ -199,7 +194,7 @@ function updateSpeed() {
 }
 
 function updateCheckedpoint() {
-  checkBox.changeMessage('Checkpoint: ' + checkpointsCount);
+  checkBox.changeMessage('Checkpoint(s): ' + checkpointsCount);
 }
 
 var sim = true;
@@ -207,7 +202,7 @@ var cockpit = false;
 
 function cameraCockpit() {
   if (cockpit) {
-    camera.position.set(0, 5, 4);
+    camera.position.set(0, 0.5, 0.7);
   } else camera.position.set(0, -30, 10);
 }
 
@@ -240,7 +235,6 @@ async function keyboardUpdate() {
   }
 
   var radiusCheckpoint = getRadius();
-
 
   for (var i=0; i < checkpoints.length; i++)
   {
@@ -355,10 +349,10 @@ async function keyboardUpdate() {
     }
   } else {
     if (aviao.rotation.y > 0 && aviao.rotation.y <= degreesToRadians(40)) {
-      aviao.rotation.y -= degreesToRadians(0.5);
+      aviao.rotation.y -= degreesToRadians(1);
     }
     if (aviao.rotation.y < 0 && aviao.rotation.y >= degreesToRadians(-40)) {
-      aviao.rotation.y += degreesToRadians(0.5);
+      aviao.rotation.y += degreesToRadians(1);
     }
   }
 }
