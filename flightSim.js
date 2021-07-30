@@ -13,7 +13,6 @@ import {
   initDefaultBasicLight,
 } from '../libs/util/util.js';
 
-import { gerarAviao } from './airplane.js';
 import { generateTrack } from './track.js';
 import { createCheckpoints } from './track.js';
 import { getRadius } from './track.js';
@@ -54,13 +53,10 @@ camera2.up.set(0.0, 1.0, 0.0);
 
 var inspecScene = new THREE.Scene();
 initDefaultBasicLight(inspecScene);
-
 var aviaoInspec = new THREE.Object3D();
-aviaoInspec.rotateZ(degreesToRadians(180));
 var planeInspec = new THREE.Object3D();
 planeInspec.add(aviaoInspec);
 planeInspec.position.set(0, 0, 0);
-
 inspecScene.add(planeInspec);
 
 
@@ -120,8 +116,10 @@ scene.add(groundPlane);
  * airplane
  */
 var aviao = new THREE.Object3D();
+aviao.position.set(0,0,2);
 
 loadOBJFile("./assets/", "14 bis", 2, 0, true, aviao);
+
 
 /**
  * Track
@@ -147,7 +145,7 @@ loadOBJFile("./assets/", "cenario", 2, 0, true, cenario);
  * simple object to controll camera
  */
 var cameraHolder = new THREE.Object3D();
-cameraHolder.position.set(0, -500, 0);
+cameraHolder.position.set(0, -1000, 0);
 scene.add(cameraHolder);
 cameraHolder.add(camera);
 cameraHolder.add(aviao);
@@ -183,8 +181,8 @@ function updateTime(stop) {
 
 /* message speed */
 function updateSpeed() {
-  speedBox.changeMessage('Speed: ' + (speed * mult * 48).toFixed(0) + ' km/h');
-  if (speed * mult * 48 >= 839) {
+  speedBox.changeMessage('Speed: ' + (Math.pow(mult, 2)).toFixed(0) + ' km/h');
+  if (Math.pow(mult, 2) > 41) {
     maxSpeedBox.changeMessage('MAX');
     maxSpeedBox.box.style.display = 'block';
   } else {
@@ -207,12 +205,12 @@ function cameraCockpit() {
 }
 
 const speed = 1.0; /* sets the initial speed */
-var mult = 5; /* sets initial speed multiplication */
+var mult = 2; /* sets initial speed multiplication */
 var movement = false; /* movement check */
-var angularSpeedVertical = 2;
-var angularSpeedHorizontal = 0.015;
+var angularSpeedVertical = 0.317;
+var angularSpeedHorizontal = 0.00238;
 
-var animation = degreesToRadians(1);
+var animation = degreesToRadians(0.1587);
 var modeCam2 = false;
 var started = false;
 
@@ -227,11 +225,13 @@ async function keyboardUpdate() {
     speedBox.box.style.display = 'none';
     timeBox.box.style.display = 'none';
     maxSpeedBox.box.style.display = 'none';
+    checkBox.box.style.display = 'none';
   } else {
     /* visible secondaryBox */
     speedBox.box.style.display = 'block';
     timeBox.box.style.display = 'block';
     maxSpeedBox.box.style.display = 'block';
+    checkBox.box.style.display = 'block';
   }
 
   var radiusCheckpoint = getRadius();
@@ -286,7 +286,7 @@ async function keyboardUpdate() {
     sim = !sim;
     modeCam2 = !modeCam2;
 
-    if (!modeCam2) mult = 5;
+    if (!modeCam2) mult = 2;
   }
 
   if (keyboard.down('enter')) {
@@ -302,28 +302,28 @@ async function keyboardUpdate() {
     cameraHolder.translateY(speed * mult);
   }
 
-  if (keyboard.pressed('Q') && mult < 17.4) {
+  if (keyboard.pressed('Q') && mult < 6.4) {
     mult += 0.1;
     updateSpeed();
     movement = true;
   }
-  if (keyboard.pressed('A') && mult > 5.1) {
+  if (keyboard.pressed('A') && mult > 2.1) {
     mult -= 0.1;
     updateSpeed();
   }
 
   if (keyboard.pressed('up') && aviao.rotation.x <= degreesToRadians(1)) {
-    cameraHolder.translateZ(-angularSpeedVertical);
-    if (aviao.rotation.x >= degreesToRadians(-20)) {
-      aviao.rotation.x -= animation;
+    cameraHolder.translateZ(-angularSpeedVertical * mult);
+    if (aviao.rotation.x >= degreesToRadians(-15)) {
+      aviao.rotation.x -= animation * mult;
     }
   } else if (
     keyboard.pressed('down') &&
     aviao.rotation.x >= degreesToRadians(-1)
   ) {
-    cameraHolder.translateZ(angularSpeedVertical);
-    if (aviao.rotation.x <= degreesToRadians(20)) {
-      aviao.rotation.x += animation;
+    cameraHolder.translateZ(angularSpeedVertical * mult);
+    if (aviao.rotation.x <= degreesToRadians(15)) {
+      aviao.rotation.x += animation * mult;
     }
   } else {
     if (aviao.rotation.x > 0 && aviao.rotation.x <= degreesToRadians(22)) {
@@ -335,24 +335,24 @@ async function keyboardUpdate() {
   }
 
   if (keyboard.pressed('left') && aviao.rotation.y <= degreesToRadians(1)) {
-    cameraHolder.rotateZ(angularSpeedHorizontal);
-    if (aviao.rotation.y >= degreesToRadians(-35)) {
+    cameraHolder.rotateZ(angularSpeedHorizontal * mult);
+    if (aviao.rotation.y >= degreesToRadians(-25)) {
       aviao.rotation.y -= animation;
     }
   } else if (
     keyboard.pressed('right') &&
     aviao.rotation.y >= degreesToRadians(-1)
   ) {
-    cameraHolder.rotateZ(-angularSpeedHorizontal);
-    if (aviao.rotation.y <= degreesToRadians(35)) {
+    cameraHolder.rotateZ(-angularSpeedHorizontal * mult);
+    if (aviao.rotation.y <= degreesToRadians(25)) {
       aviao.rotation.y += animation;
     }
   } else {
     if (aviao.rotation.y > 0 && aviao.rotation.y <= degreesToRadians(40)) {
-      aviao.rotation.y -= degreesToRadians(1);
+      aviao.rotation.y -= degreesToRadians(0.6);
     }
     if (aviao.rotation.y < 0 && aviao.rotation.y >= degreesToRadians(-40)) {
-      aviao.rotation.y += degreesToRadians(1);
+      aviao.rotation.y += degreesToRadians(0.6);
     }
   }
 }
@@ -433,7 +433,6 @@ function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility)
         aviaoInspec.copy(aviao, true);
         obj.rotateX(Math.PI/2);
         obj.rotateY(Math.PI/2);
-         obj.translateY(6);
 //        obj.rotateZ(Math.PI/2);
         console.log("adicionado")
 
