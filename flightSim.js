@@ -202,7 +202,7 @@ var cockpit = false;
 
 function cameraCockpit() {
   if (cockpit) {
-    camera.position.set(0, 0.5, 0.7);
+    camera.position.set(0, 0.5, 6.7);
   } else camera.position.set(0, -30, 10);
 }
 
@@ -419,7 +419,9 @@ function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility)
         if(modelName == "cenario"){
           console.log("começando a adicionar")
           obj.rotateX(Math.PI/2);
-          obj.rotateY(Math.PI/3);
+          obj.rotateY(-Math.PI*2/3 + Math.PI/2 - Math.PI/6);
+          obj.translateZ(-600);
+          obj.translateX(-200);
           scene.add ( obj );
           console.log("adicionado à cena")
         }
@@ -429,6 +431,7 @@ function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility)
         aviao.add(obj);
         obj.rotateX(Math.PI/2);
         obj.rotateY(Math.PI/2);
+         obj.translateY(6);
 //        obj.rotateZ(Math.PI/2);
         console.log("adicionado")
 
