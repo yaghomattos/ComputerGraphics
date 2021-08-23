@@ -202,7 +202,7 @@ var cockpit = false;
 
 function cameraCockpit() {
   if (cockpit) {
-    camera.position.set(0, 0.5, 6.7);
+    camera.position.set(0, 0.5, 4);
   } else camera.position.set(0, -30, 10);
 }
 
@@ -427,7 +427,6 @@ function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility) {
           aviaoInspec.copy(aviao, true);
           obj.rotateX(Math.PI / 2);
           obj.rotateY(Math.PI / 2);
-          obj.translateX(6);
           //        obj.rotateZ(Math.PI/2);
           console.log('adicionado');
         }
