@@ -25,7 +25,6 @@ var checkpointsCount = 0;
 var scene = new THREE.Scene(); // Create main scene
 var stats = new Stats(); // To show FPS information
 var renderer = initRenderer(); // View function in util/utils
-renderer.setClearColor('rgb(135, 206, 235)');
 
 var camera = new THREE.PerspectiveCamera(
   45,
@@ -153,7 +152,12 @@ scene.add(cameraHolder);
 cameraHolder.add(camera);
 cameraHolder.add(aviao);
 
-showInformation();
+var showInfoBox = false;
+
+if(showInfoBox) {
+  console.log(showInfoBox)
+  showInformation();
+}  
 
 var speedBox = new SecondaryBox('');
 
@@ -287,7 +291,7 @@ async function keyboardUpdate() {
     if (!modeCam2) mult = 2;
   }
 
-  if (keyboard.down('enter')) {
+  if (keyboard.down('enter') && initialize === true) {
     track.visible = !track.visible;
   }
 
@@ -372,11 +376,11 @@ function showInformation() {
 
 var loadingScreen = {
   scene: new THREE.Scene(),
-  camera: new THREE.PerspectiveCamera(90, 1280/720, 0.1, 100),
-}
+  camera: new THREE.PerspectiveCamera(90, 1280 / 720, 0.1, 100),
+};
 
 function checkInit() {
-  if(resourcesLoaded && keyboard.down('T')) {
+  if (resourcesLoaded && keyboard.down('enter')) {
     initialize = true;
   }
 }
@@ -399,11 +403,11 @@ function loadOBJFile(modelPath, modelName, visibility) {
         ' files.'
     );
   };
-  
+
   manager.onLoad = function () {
     console.log('Loading complete!');
   };
-  
+
   manager.onProgress = function (url, itemsLoaded, itemsTotal) {
     console.log(
       'Loading file: ' +
@@ -414,11 +418,11 @@ function loadOBJFile(modelPath, modelName, visibility) {
         itemsTotal +
         ' files.'
     );
-    if(itemsLoaded === itemsTotal) {
+    if (itemsLoaded === itemsTotal) {
       resourcesLoaded = true;
     }
   };
-  
+
   manager.onError = function (url) {
     console.log('There was an error loading ' + url);
   };
@@ -432,73 +436,79 @@ function loadOBJFile(modelPath, modelName, visibility) {
     var objLoader = new OBJLoader(manager);
     objLoader.setMaterials(materials);
     objLoader.setPath(modelPath);
-    objLoader.load(
-      modelName + '.obj',
-      function (obj) {
-        // console.log('objeto carregado, sendo processado');
-        obj.visible = visibility;
-        obj.name = modelName;
-        // Set 'castShadow' property for each children of the group
-        obj.traverse(function (child) {
-          // console.log('carregando...');
-          child.castShadow = false;
-        });
+    objLoader.load(modelName + '.obj', function (obj) {
+      // console.log('objeto carregado, sendo processado');
+      obj.visible = visibility;
+      obj.name = modelName;
+      // Set 'castShadow' property for each children of the group
+      obj.traverse(function (child) {
+        // console.log('carregando...');
+        child.castShadow = false;
+      });
 
-        obj.traverse(function (node) {
-          // console.log('carregando(2)...');
-          if (node.material) node.material.side = THREE.DoubleSide;
-        });
-        // console.log('finalizado');
+      obj.traverse(function (node) {
+        // console.log('carregando(2)...');
+        if (node.material) node.material.side = THREE.DoubleSide;
+      });
+      // console.log('finalizado');
 
-        /*
+      /*
         var obj = normalizeAndRescale(obj, desiredScale);
         console.log("1")
         var obj = fixPosition(obj);
         console.log("2")
         obj.rotateY(degreesToRadians(angle));
         */
-        // console.log('obj: ');
-        // console.log(obj);
+      // console.log('obj: ');
+      // console.log(obj);
 
-        if (modelName == 'cenario') {
-          // console.log('começando a adicionar');
-          obj.rotateX(Math.PI / 2);
-          obj.rotateY((-Math.PI * 2) / 3 + Math.PI / 2 - Math.PI / 6);
-          obj.translateZ(-600);
-          obj.translateX(-200);
-          scene.add(obj);
-          // console.log('adicionado à cena');
-        }
-        if (modelName == '14 bis') {
-          // console.log('adicionando ao objeto');
-          aviao.add(obj);
-          // console.log('adicionando ao modelo de inspeção');
-          aviaoInspec.copy(aviao, true);
-          obj.rotateX(Math.PI / 2);
-          obj.rotateY(Math.PI / 2);
-          //        obj.rotateZ(Math.PI/2);
-          // console.log('adicionado');
-        }
-      },
-      onProgress,
-      onError
-    );
+      if (modelName == 'cenario') {
+        // console.log('começando a adicionar');
+        obj.rotateX(Math.PI / 2);
+        obj.rotateY((-Math.PI * 2) / 3 + Math.PI / 2 - Math.PI / 6);
+        obj.translateZ(-600);
+        obj.translateX(-200);
+        scene.add(obj);
+        // console.log('adicionado à cena');
+      }
+      if (modelName == '14 bis') {
+        // console.log('adicionando ao objeto');
+        aviao.add(obj);
+        // console.log('adicionando ao modelo de inspeção');
+        aviaoInspec.copy(aviao, true);
+        obj.rotateX(Math.PI / 2);
+        obj.rotateY(Math.PI / 2);
+        //        obj.rotateZ(Math.PI/2);
+        // console.log('adicionado');
+      }
+    });
   });
 }
 
-function onError() {}
+function loading() {
+  renderer.setClearColor('rgb(0, 0, 0)');
+  speedBox.box.style.display = 'none';
+  timeBox.box.style.display = 'none';
+  maxSpeedBox.box.style.display = 'none';
+  checkBox.box.style.display = 'none';
+  showInfoBox = false;
+}
 
-function onProgress() {}
+function flightSim() {
+  renderer.setClearColor('rgb(135, 206, 235)');
+  showInfoBox = true;
+}
 
 function render() {
   stats.update(); // Update FPS
   keyboardUpdate();
   requestAnimationFrame(render); // Show events
-  if(initialize === false) {
-    renderer.render(loadingScreen.scene, loadingScreen.camera,);
+  if (initialize === false) {
+    renderer.render(loadingScreen.scene, loadingScreen.camera);
+    loading();
     checkInit();
-  }
-  else {
+  } else {
+    flightSim();
     if (sim) renderer.render(scene, camera);
     else renderer.render(inspecScene, camera2);
   }
