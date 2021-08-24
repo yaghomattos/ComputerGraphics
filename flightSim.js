@@ -370,15 +370,64 @@ function showInformation() {
   controls.show();
 }
 
-function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility) {
-  console.log('começando');
+var loadingScreen = {
+  scene: new THREE.Scene(),
+  camera: new THREE.PerspectiveCamera(90, 1280/720, 0.1, 100),
+}
+
+function checkInit() {
+  if(resourcesLoaded && keyboard.down('T')) {
+    initialize = true;
+  }
+}
+
+var initialize = false;
+var resourcesLoaded = false;
+
+function loadOBJFile(modelPath, modelName, visibility) {
+  // console.log('começando');
   var manager = new THREE.LoadingManager();
+
+  manager.onStart = function (url, itemsLoaded, itemsTotal) {
+    console.log(
+      'Started loading file: ' +
+        url +
+        '.\nLoaded ' +
+        itemsLoaded +
+        ' of ' +
+        itemsTotal +
+        ' files.'
+    );
+  };
+  
+  manager.onLoad = function () {
+    console.log('Loading complete!');
+  };
+  
+  manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+    console.log(
+      'Loading file: ' +
+        url +
+        '.\nLoaded ' +
+        itemsLoaded +
+        ' of ' +
+        itemsTotal +
+        ' files.'
+    );
+    if(itemsLoaded === itemsTotal) {
+      resourcesLoaded = true;
+    }
+  };
+  
+  manager.onError = function (url) {
+    console.log('There was an error loading ' + url);
+  };
 
   var mtlLoader = new MTLLoader(manager);
   mtlLoader.setPath(modelPath);
   mtlLoader.load(modelName + '.mtl', function (materials) {
     materials.preload();
-    console.log('materiais carregados');
+    // console.log('materiais carregados');
 
     var objLoader = new OBJLoader(manager);
     objLoader.setMaterials(materials);
@@ -386,20 +435,20 @@ function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility) {
     objLoader.load(
       modelName + '.obj',
       function (obj) {
-        console.log('objeto carregado, sendo processado');
+        // console.log('objeto carregado, sendo processado');
         obj.visible = visibility;
         obj.name = modelName;
         // Set 'castShadow' property for each children of the group
         obj.traverse(function (child) {
-          console.log('carregando...');
+          // console.log('carregando...');
           child.castShadow = false;
         });
 
         obj.traverse(function (node) {
-          console.log('carregando(2)...');
+          // console.log('carregando(2)...');
           if (node.material) node.material.side = THREE.DoubleSide;
         });
-        console.log('finalizado');
+        // console.log('finalizado');
 
         /*
         var obj = normalizeAndRescale(obj, desiredScale);
@@ -408,27 +457,27 @@ function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility) {
         console.log("2")
         obj.rotateY(degreesToRadians(angle));
         */
-        console.log('obj: ');
-        console.log(obj);
+        // console.log('obj: ');
+        // console.log(obj);
 
         if (modelName == 'cenario') {
-          console.log('começando a adicionar');
+          // console.log('começando a adicionar');
           obj.rotateX(Math.PI / 2);
           obj.rotateY((-Math.PI * 2) / 3 + Math.PI / 2 - Math.PI / 6);
           obj.translateZ(-600);
           obj.translateX(-200);
           scene.add(obj);
-          console.log('adicionado à cena');
+          // console.log('adicionado à cena');
         }
         if (modelName == '14 bis') {
-          console.log('adicionando ao objeto');
+          // console.log('adicionando ao objeto');
           aviao.add(obj);
-          console.log('adicionando ao modelo de inspeção');
+          // console.log('adicionando ao modelo de inspeção');
           aviaoInspec.copy(aviao, true);
           obj.rotateX(Math.PI / 2);
           obj.rotateY(Math.PI / 2);
           //        obj.rotateZ(Math.PI/2);
-          console.log('adicionado');
+          // console.log('adicionado');
         }
       },
       onProgress,
@@ -445,8 +494,14 @@ function render() {
   stats.update(); // Update FPS
   keyboardUpdate();
   requestAnimationFrame(render); // Show events
-  if (sim) renderer.render(scene, camera);
-  else renderer.render(inspecScene, camera2);
+  if(initialize === false) {
+    renderer.render(loadingScreen.scene, loadingScreen.camera,);
+    checkInit();
+  }
+  else {
+    if (sim) renderer.render(scene, camera);
+    else renderer.render(inspecScene, camera2);
+  }
   cameraCockpit();
   trackballControls.update();
 }
