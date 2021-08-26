@@ -426,9 +426,6 @@ function loadOBJFile(modelPath, modelName, visibility) {
         itemsTotal +
         ' files.'
     );
-    if(itemsLoaded === 1)
-      initialMessage.changeMessage('Loading 50%...')
-    setTimeout(function(){ }, 30000);
   };
 
   manager.onLoad = function () {
@@ -526,6 +523,10 @@ function loading() {
   cubeTranslate += cubeTranslate/10;
   
   initialMessage.box.style.display = 'block';
+
+  if(loadedItems === 1) {
+    initialMessage.changeMessage('Loading 50%...')
+  }
 
   speedBox.box.style.display = 'none';
   timeBox.box.style.display = 'none';
