@@ -25,6 +25,8 @@ var checkpointsCount = 0;
 var scene = new THREE.Scene(); // Create main scene
 var stats = new Stats(); // To show FPS information
 var renderer = initRenderer(); // View function in util/utils
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 var camera = new THREE.PerspectiveCamera(
   45,
@@ -88,15 +90,16 @@ var sum = createLightSphere(
 scene.add(sum);
 
 var dirLight = new THREE.DirectionalLight('rgb(255,255,150)');
-dirLight.position.copy(new THREE.Vector3(10000, 25000, 5000));
-dirLight.shadow.bias = 0.0001;
-dirLight.shadow.mapSize.width = 2048;
-dirLight.shadow.mapSize.height = 2048;
-dirLight.castShadow = true;
-dirLight.shadow.camera.left = -200;
-dirLight.shadow.camera.right = 200;
-dirLight.shadow.camera.top = 200;
-dirLight.shadow.camera.bottom = -200;
+dirLight.position.set(0, 1, 0);
+dirLight.castShadow = true;    
+dirLight.shadow.bias = -0.0001;
+dirLight.shadow.camera.far = 5500;
+dirLight.shadow.mapSize.width = 1024 * 6;
+dirLight.shadow.mapSize.height = 1024 * 6;
+dirLight.shadow.camera.left = -2500;
+dirLight.shadow.camera.right = 2500;
+dirLight.shadow.camera.top = 2500;
+dirLight.shadow.camera.bottom = -2500;   
 scene.add(dirLight);
 
 var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
@@ -113,6 +116,7 @@ var groundPlane = createGroundPlaneWired(
   'rgb(34,139,34)'
 );
 groundPlane.rotateX(degreesToRadians(90));
+groundPlane.receiveShadow = true;
 scene.add(groundPlane);
 
 /**
@@ -127,12 +131,14 @@ loadOBJFile('./assets/', '14 bis', 2, 0, true, aviao);
  * Track
  */
 var track = generateTrack();
+track.castShadow = true;
 scene.add(track);
 
 var checkpoints = createCheckpoints();
 
 for (let i = 0; i < checkpoints.length; i++) {
   var check = checkpoints[i];
+  check.castShadow = true;
   scene.add(check);
 }
 
@@ -441,6 +447,7 @@ function loadOBJFile(modelPath, modelName, visibility) {
       obj.visible = visibility;
       obj.name = modelName;
       // Set 'castShadow' property for each children of the group
+      obj.castShadow = true;
       obj.traverse(function (child) {
         // console.log('carregando...');
         child.castShadow = false;
