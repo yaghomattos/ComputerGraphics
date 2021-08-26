@@ -13,9 +13,7 @@ import {
   initDefaultBasicLight,
 } from '../libs/util/util.js';
 
-import { generateTrack } from './track.js';
-import { createCheckpoints } from './track.js';
-import { getRadius } from './track.js';
+import { generateTrack, createCheckpoints, getRadius } from './track.js';
 
 import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
@@ -44,7 +42,7 @@ var camera2 = new THREE.PerspectiveCamera(
   45,
   window.innerWidth / window.innerHeight,
   0.1,
-  1000000
+  10000
 );
 
 /* sets the position of the camera at the backward of the plane */
@@ -109,8 +107,8 @@ scene.add(light);
  * wireframe plan
  */
 var groundPlane = createGroundPlaneWired(
-  50000,
-  50000,
+  30000,
+  30000,
   100,
   100,
   'rgb(34,139,34)'
@@ -123,6 +121,7 @@ scene.add(groundPlane);
  * airplane
  */
 var aviao = new THREE.Object3D();
+aviao.castShadow = true;
 aviao.position.set(0, 0, 2);
 
 loadOBJFile('./assets/', '14 bis', 2, 0, true, aviao);
@@ -145,8 +144,8 @@ for (let i = 0; i < checkpoints.length; i++) {
 /**
  * cenario
  */
-var cenario;
-
+var cenario = new THREE.Object3D();
+cenario.castShadow = true;
 loadOBJFile('./assets/', 'cenario', 2, 0, true, cenario);
 
 /**
@@ -176,6 +175,9 @@ timeBox.box.style.bottom = '50px';
 
 var checkBox = new SecondaryBox('');
 checkBox.box.style.bottom = '100px';
+
+var initialMessage = new SecondaryBox('loading 0%...');
+initialMessage.box.style.backgroundColor = 'rgba(0,0,0,0)'
 
 var keyboard = new KeyboardState();
 
@@ -380,19 +382,35 @@ function showInformation() {
   controls.show();
 }
 
-var loadingScreen = {
-  scene: new THREE.Scene(),
-  camera: new THREE.PerspectiveCamera(90, 1280 / 720, 0.1, 100),
-};
+var cameraLoading = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+cameraLoading.position.set(0.0, -20.0, 10.0);
+cameraLoading.lookAt(0.0, 0.0, 0.0);
+cameraLoading.up.set(0.0, 1.0, 0.0);
+
+var loadingScene = new THREE.Scene();
+loadingScene.add(new THREE.AmbientLight(0xcccccc));
+
+initialMessage.box.style.display = 'none';
+
+var Material = new THREE.MeshNormalMaterial();
+var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+var cube = new THREE.Mesh(cubeGeometry, Material);
+cube.position.set(0.0, 0.0, 0.0);
+loadingScene.add(cube);
+
+var cubeRotation = 0.06;
+var cubeTranslate = 0.5;
+
+var initialize = false;
+var resourcesLoaded = false;
+var totalItems = 0;
+var loadedItems = 0;
 
 function checkInit() {
   if (resourcesLoaded && keyboard.down('enter')) {
     initialize = true;
   }
 }
-
-var initialize = false;
-var resourcesLoaded = false;
 
 function loadOBJFile(modelPath, modelName, visibility) {
   // console.log('começando');
@@ -408,10 +426,18 @@ function loadOBJFile(modelPath, modelName, visibility) {
         itemsTotal +
         ' files.'
     );
+    if(itemsLoaded === 1)
+      initialMessage.changeMessage('Loading 50%...')
+    setTimeout(function(){ }, 30000);
   };
 
   manager.onLoad = function () {
     console.log('Loading complete!');
+    loadedItems++;
+    if (totalItems === loadedItems) {
+      resourcesLoaded = true;
+      initialMessage.changeMessage('Loading 100%... Arquivos carregados! Pressione Enter para iniciar');
+    }  
   };
 
   manager.onProgress = function (url, itemsLoaded, itemsTotal) {
@@ -424,9 +450,7 @@ function loadOBJFile(modelPath, modelName, visibility) {
         itemsTotal +
         ' files.'
     );
-    if (itemsLoaded === itemsTotal) {
-      resourcesLoaded = true;
-    }
+    totalItems = itemsTotal;
   };
 
   manager.onError = function (url) {
@@ -493,7 +517,16 @@ function loadOBJFile(modelPath, modelName, visibility) {
 }
 
 function loading() {
-  renderer.setClearColor('rgb(0, 0, 0)');
+  renderer.render(loadingScene, cameraLoading);
+  renderer.setClearColor('rgb(80, 80, 80)');
+  cube.rotateY(cubeRotation);
+  cube.translateY(cubeTranslate);
+
+  cubeRotation += cubeRotation/12;
+  cubeTranslate += cubeTranslate/10;
+  
+  initialMessage.box.style.display = 'block';
+
   speedBox.box.style.display = 'none';
   timeBox.box.style.display = 'none';
   maxSpeedBox.box.style.display = 'none';
@@ -502,6 +535,7 @@ function loading() {
 }
 
 function flightSim() {
+  initialMessage.box.style.display = 'none';
   renderer.setClearColor('rgb(135, 206, 235)');
   showInfoBox = true;
 }
@@ -511,7 +545,6 @@ function render() {
   keyboardUpdate();
   requestAnimationFrame(render); // Show events
   if (initialize === false) {
-    renderer.render(loadingScreen.scene, loadingScreen.camera);
     loading();
     checkInit();
   } else {
