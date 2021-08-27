@@ -178,6 +178,8 @@ checkBox.box.style.bottom = '100px';
 
 var initialMessage = new SecondaryBox('loading 0%...');
 initialMessage.box.style.backgroundColor = 'rgba(0,0,0,0)'
+initialMessage.box.style.left = '27%';
+initialMessage.box.style.bottom = '30%';
 
 var keyboard = new KeyboardState();
 
@@ -382,29 +384,47 @@ function showInformation() {
   controls.show();
 }
 
-var cameraLoading = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-cameraLoading.position.set(0.0, -20.0, 10.0);
+var cameraLoading = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 80);
+cameraLoading.position.set(0.0, -15.0, 20.0);
 cameraLoading.lookAt(0.0, 0.0, 0.0);
 cameraLoading.up.set(0.0, 1.0, 0.0);
 
 var loadingScene = new THREE.Scene();
-loadingScene.add(new THREE.AmbientLight(0xcccccc));
+loadingScene.add(new THREE.AmbientLight(0xffffff));
 
-initialMessage.box.style.display = 'none';
+function createSlider(a, b, c) {
+  var sliderGeometry = new THREE.BoxGeometry(5, 3.5, 0.5);
+  var sliderMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(100,250,200)'});
+  var slider = new THREE.Mesh(sliderGeometry, sliderMaterial);
+  slider.position.set(a, b, c);
+  return(slider);
+}
 
-var Material = new THREE.MeshNormalMaterial();
-var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
-var cube = new THREE.Mesh(cubeGeometry, Material);
-cube.position.set(0.0, 0.0, 0.0);
-loadingScene.add(cube);
+var count = 0;
 
-var cubeRotation = 0.06;
-var cubeTranslate = 0.5;
+var borderMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,0)' });
+var borderGeometry = new THREE.BoxGeometry(20, 0.5, 0.3);
+var bottomBorder = new THREE.Mesh(borderGeometry, borderMaterial);
+bottomBorder.position.set(0.0, 0.0, 0.0);
+loadingScene.add(bottomBorder);
+
+var topBorder = new THREE.Mesh(borderGeometry, borderMaterial);
+topBorder.position.set(0.0, 4.0, 0.0);
+loadingScene.add(topBorder);
+
+var borderGeometry2 = new THREE.BoxGeometry(0.5, 4.5, 0.3);
+var rightBorder = new THREE.Mesh(borderGeometry2, borderMaterial);
+rightBorder.position.set(10, 2.0, 0.0);
+loadingScene.add(rightBorder); 
+
+var leftBorder = new THREE.Mesh(borderGeometry2, borderMaterial);
+leftBorder.position.set(-10, 2.0, 0.0);
+loadingScene.add(leftBorder); 
+
+var trackballControls = new TrackballControls(cameraLoading, renderer.domElement);
 
 var initialize = false;
 var resourcesLoaded = false;
-var totalItems = 0;
-var loadedItems = 0;
 
 function checkInit() {
   if (resourcesLoaded && keyboard.down('enter')) {
@@ -429,11 +449,16 @@ function loadOBJFile(modelPath, modelName, visibility) {
   };
 
   manager.onLoad = function () {
+    if(count === 2) {
+      initialMessage.changeMessage('Loading 75%...');
+      loadingScene.add(createSlider(2.5, 2.0, 0.0))
+      count++;
+    }
     console.log('Loading complete!');
-    loadedItems++;
-    if (totalItems === loadedItems) {
-      resourcesLoaded = true;
+    if (count === 3) {
+      loadingScene.add(createSlider(7.2, 2.0, 0.0))
       initialMessage.changeMessage('Loading 100%... Arquivos carregados! Pressione Enter para iniciar');
+      resourcesLoaded = true;
     }  
   };
 
@@ -447,7 +472,6 @@ function loadOBJFile(modelPath, modelName, visibility) {
         itemsTotal +
         ' files.'
     );
-    totalItems = itemsTotal;
   };
 
   manager.onError = function (url) {
@@ -516,16 +540,18 @@ function loadOBJFile(modelPath, modelName, visibility) {
 function loading() {
   renderer.render(loadingScene, cameraLoading);
   renderer.setClearColor('rgb(80, 80, 80)');
-  cube.rotateY(cubeRotation);
-  cube.translateY(cubeTranslate);
 
-  cubeRotation += cubeRotation/12;
-  cubeTranslate += cubeTranslate/10;
-  
   initialMessage.box.style.display = 'block';
 
-  if(loadedItems === 1) {
-    initialMessage.changeMessage('Loading 50%...')
+  if(count < 1) {
+    loadingScene.add(createSlider(-7.2, 2.0, 0.0))
+    count++;
+  }
+
+  if(count === 1) {
+    initialMessage.changeMessage('Loading 50%...');
+    loadingScene.add(createSlider(-2.5, 2.0, 0.0));
+    count++;
   }
 
   speedBox.box.style.display = 'none';
