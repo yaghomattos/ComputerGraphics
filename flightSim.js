@@ -515,10 +515,9 @@ function loadOBJFile(modelPath, modelName, visibility) {
       obj.visible = visibility;
       obj.name = modelName;
       // Set 'castShadow' property for each children of the group
-      obj.castShadow = true;
       obj.traverse(function (child) {
         // console.log('carregando...');
-        child.castShadow = false;
+        child.castShadow = true;
       });
 
       obj.traverse(function (node) {
