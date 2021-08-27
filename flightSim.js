@@ -20,15 +20,30 @@ import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
 
 var checkpointsCount = 0;
 
-var scene = new THREE.Scene(); // Create main scene
 var stats = new Stats(); // To show FPS information
 var renderer = initRenderer(); // View function in util/utils
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+var cameraLoading = new THREE.PerspectiveCamera(
+  45,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  80
+);
+cameraLoading.position.set(0.0, -15.0, 20.0);
+cameraLoading.lookAt(0.0, 0.0, 0.0);
+cameraLoading.up.set(0.0, 1.0, 0.0);
+
+var loadingScene = new THREE.Scene();
+loadingScene.add(new THREE.AmbientLight(0xffffff));
+
+/* Create main scene */
+var scene = new THREE.Scene();
+
 /**
  * Main camera, to airplane view
-*/
+ */
 var camera = new THREE.PerspectiveCamera(
   45,
   window.innerWidth / window.innerHeight,
@@ -43,7 +58,7 @@ camera.up.set(0.0, 1.0, 0.0);
 
 /**
  * Sencondary camera, to inspection plane
-*/
+ */
 var inspecCamera = new THREE.PerspectiveCamera(
   45,
   window.innerWidth / window.innerHeight,
@@ -57,7 +72,7 @@ inspecCamera.up.set(0.0, 1.0, 0.0);
 
 /**
  * Inspection Scene
-*/
+ */
 var inspecScene = new THREE.Scene();
 initDefaultBasicLight(inspecScene);
 var aviaoInspec = new THREE.Object3D();
@@ -66,7 +81,10 @@ planeInspec.add(aviaoInspec);
 planeInspec.position.set(0, 0, 0);
 inspecScene.add(planeInspec);
 
-var trackballControls = new TrackballControls(inspecCamera, renderer.domElement);
+var trackballControls = new TrackballControls(
+  inspecCamera,
+  renderer.domElement
+);
 
 // Listen window size changes
 window.addEventListener(
@@ -96,8 +114,8 @@ dirLight.shadow.mapSize.height = 4092;
 dirLight.shadow.camera.left = -200;
 dirLight.shadow.camera.right = 200;
 dirLight.shadow.camera.top = 200;
-dirLight.shadow.camera.bottom = -200; 
-dirLight.castShadow = true;    
+dirLight.shadow.camera.bottom = -200;
+dirLight.castShadow = true;
 scene.add(dirLight);
 
 var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
@@ -173,7 +191,7 @@ var checkBox = new SecondaryBox('');
 checkBox.box.style.bottom = '100px';
 
 var initialMessage = new SecondaryBox('loading 0%...');
-initialMessage.box.style.backgroundColor = 'rgba(0,0,0,0)'
+initialMessage.box.style.backgroundColor = 'rgba(0,0,0,0)';
 initialMessage.box.style.left = '27%';
 initialMessage.box.style.bottom = '30%';
 
@@ -204,7 +222,9 @@ function updateSpeed() {
 }
 
 function updateCheckedpoint() {
-  checkBox.changeMessage('Checkpoint(s): ' + checkpointsCount);
+  checkBox.changeMessage(
+    'Checkpoint(s): ' + checkpointsCount + '/' + checkpoints.length
+  );
 }
 
 var sim = true;
@@ -289,6 +309,12 @@ async function keyboardUpdate() {
 
   if (started) updateTime();
 
+  if (keyboard.down('H')) {
+    if (controls.infoBox.style.display === 'none')
+      controls.infoBox.style.display = 'block';
+    else controls.infoBox.style.display = 'none';
+  }
+
   if (keyboard.down('space')) {
     mult = 0;
     sim = !sim;
@@ -365,34 +391,31 @@ async function keyboardUpdate() {
   }
 }
 
-  // Use this to show information onscreen
-  var controls = new InfoBox();
-  controls.add('Controls');
-  controls.addParagraph();
-  controls.add('Space to change camera mode');
-  controls.add('C for cockpit camera');
-  controls.add('Q to speed up');
-  controls.add('A to speed down');
-  controls.add('Up/Down arrow to elevator');
-  controls.add('Left / Right arrow to turn');
-  controls.add('Enter to show/hide track');
-  controls.show();
+// Use this to show information onscreen
 
+var controls = new InfoBox();
+controls.add('Controls');
+controls.addParagraph();
+controls.add('Space to change camera mode');
+controls.add('C for cockpit camera');
+controls.add('Q to speed up');
+controls.add('A to speed down');
+controls.add('Up/Down arrow to elevator');
+controls.add('Left / Right arrow to turn');
+controls.add('Enter to show/hide track');
+controls.show();
+controls.infoBox.style.display = 'none';
 
-var cameraLoading = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 80);
-cameraLoading.position.set(0.0, -15.0, 20.0);
-cameraLoading.lookAt(0.0, 0.0, 0.0);
-cameraLoading.up.set(0.0, 1.0, 0.0);
-
-var loadingScene = new THREE.Scene();
-loadingScene.add(new THREE.AmbientLight(0xffffff));
+var firstRendering = true;
 
 function createSlider(a, b, c) {
   var sliderGeometry = new THREE.BoxGeometry(5, 3.5, 0.5);
-  var sliderMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(100,250,200)'});
+  var sliderMaterial = new THREE.MeshPhongMaterial({
+    color: 'rgb(100,250,200)',
+  });
   var slider = new THREE.Mesh(sliderGeometry, sliderMaterial);
   slider.position.set(a, b, c);
-  return(slider);
+  return slider;
 }
 
 var count = 0;
@@ -410,13 +433,16 @@ loadingScene.add(topBorder);
 var borderGeometry2 = new THREE.BoxGeometry(0.5, 4.5, 0.3);
 var rightBorder = new THREE.Mesh(borderGeometry2, borderMaterial);
 rightBorder.position.set(10, 2.0, 0.0);
-loadingScene.add(rightBorder); 
+loadingScene.add(rightBorder);
 
 var leftBorder = new THREE.Mesh(borderGeometry2, borderMaterial);
 leftBorder.position.set(-10, 2.0, 0.0);
-loadingScene.add(leftBorder); 
+loadingScene.add(leftBorder);
 
-var trackballControls = new TrackballControls(cameraLoading, renderer.domElement);
+var trackballControls = new TrackballControls(
+  cameraLoading,
+  renderer.domElement
+);
 
 var initialize = false;
 var resourcesLoaded = false;
@@ -444,17 +470,19 @@ function loadOBJFile(modelPath, modelName, visibility) {
   };
 
   manager.onLoad = function () {
-    if(count === 2) {
+    if (count === 2) {
       initialMessage.changeMessage('Loading 75%...');
-      loadingScene.add(createSlider(2.5, 2.0, 0.0))
+      loadingScene.add(createSlider(2.5, 2.0, 0.0));
       count++;
     }
     console.log('Loading complete!');
     if (count === 3) {
-      loadingScene.add(createSlider(7.2, 2.0, 0.0))
-      initialMessage.changeMessage('Loading 100%... Arquivos carregados! Pressione Enter para iniciar');
+      loadingScene.add(createSlider(7.2, 2.0, 0.0));
+      initialMessage.changeMessage(
+        'Loading 100%... Arquivos carregados! Pressione Enter para iniciar'
+      );
       resourcesLoaded = true;
-    }  
+    }
   };
 
   manager.onProgress = function (url, itemsLoaded, itemsTotal) {
@@ -538,12 +566,12 @@ function loading() {
 
   initialMessage.box.style.display = 'block';
 
-  if(count < 1) {
-    loadingScene.add(createSlider(-7.2, 2.0, 0.0))
+  if (count < 1) {
+    loadingScene.add(createSlider(-7.2, 2.0, 0.0));
     count++;
   }
 
-  if(count === 1) {
+  if (count === 1) {
     initialMessage.changeMessage('Loading 50%...');
     loadingScene.add(createSlider(-2.5, 2.0, 0.0));
     count++;
@@ -553,16 +581,7 @@ function loading() {
   timeBox.box.style.display = 'none';
   maxSpeedBox.box.style.display = 'none';
   checkBox.box.style.display = 'none';
-
-  if(!resourcesLoaded) {
-    controls.infoBox.style.display = 'none';
-    console.log('none')
-  }  
-  else {
-    controls.infoBox.style.display = 'block';  
-    console.log('block')
-  } 
-} 
+}
 
 function flightSim() {
   initialMessage.box.style.display = 'none';
@@ -573,10 +592,14 @@ function render() {
   stats.update(); // Update FPS
   keyboardUpdate();
   requestAnimationFrame(render); // Show events
-  if (initialize === false) {
+  if (initialize != true) {
     loading();
     checkInit();
   } else {
+    if (firstRendering) {
+      controls.infoBox.style.display = 'block';
+      firstRendering = false;
+    }
     flightSim();
     if (sim) renderer.render(scene, camera);
     else renderer.render(inspecScene, inspecCamera);
