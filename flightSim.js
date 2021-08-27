@@ -109,13 +109,16 @@ scene.add(sum);
 
 var dirLight = new THREE.DirectionalLight('rgb(255,255,150)');
 dirLight.position.copy(new THREE.Vector3(100, 200, 100));
-dirLight.shadow.mapSize.width = 4092;
-dirLight.shadow.mapSize.height = 4092;
-dirLight.shadow.camera.left = -200;
-dirLight.shadow.camera.right = 200;
-dirLight.shadow.camera.top = 200;
-dirLight.shadow.camera.bottom = -200;
+dirLight.shadow.mapSize.width = 1024 * 20;
+dirLight.shadow.mapSize.height = 1024 * 20;
+dirLight.shadow.camera.left = -5000;
+dirLight.shadow.camera.right = 5000;
+dirLight.shadow.camera.top = 5000;
+dirLight.shadow.camera.bottom = -5000;
 dirLight.castShadow = true;
+dirLight.shadow.camera.near = -50000; // default
+dirLight.shadow.camera.far = 500000; // default
+
 scene.add(dirLight);
 
 var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
@@ -518,6 +521,7 @@ function loadOBJFile(modelPath, modelName, visibility) {
       obj.traverse(function (child) {
         // console.log('carregando...');
         child.castShadow = true;
+        child.receiveShadow = true;
       });
 
       obj.traverse(function (node) {
