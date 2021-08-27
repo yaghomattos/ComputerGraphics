@@ -18,12 +18,8 @@ import { generateTrack, createCheckpoints, getRadius } from './track.js';
 import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
 
-var checkpointsCount = 0;
-
 var stats = new Stats(); // To show FPS information
 var renderer = initRenderer(); // View function in util/utils
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 var cameraLoading = new THREE.PerspectiveCamera(
   45,
@@ -142,8 +138,6 @@ scene.add(groundPlane);
  * airplane
  */
 var aviao = new THREE.Object3D();
-aviao.castShadow = true;
-aviao.receiveShadow = true;
 aviao.position.set(0, 0, 2);
 
 loadOBJFile('./assets/', '14 bis', 2, 0, true, aviao);
@@ -155,6 +149,8 @@ var track = generateTrack();
 track.castShadow = true;
 track.receiveShadow = true;
 scene.add(track);
+
+
 
 var checkpoints = createCheckpoints();
 
@@ -169,7 +165,6 @@ for (let i = 0; i < checkpoints.length; i++) {
  * cenario
  */
 var cenario = new THREE.Object3D();
-cenario.castShadow = true;
 loadOBJFile('./assets/', 'cenario', 2, 0, true, cenario);
 
 /**
@@ -223,6 +218,8 @@ function updateSpeed() {
     maxSpeedBox.box.style.display = 'none';
   }
 }
+
+var checkpointsCount = 0;
 
 function updateCheckedpoint() {
   checkBox.changeMessage(
