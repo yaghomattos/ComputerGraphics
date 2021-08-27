@@ -439,11 +439,6 @@ var leftBorder = new THREE.Mesh(borderGeometry2, borderMaterial);
 leftBorder.position.set(-10, 2.0, 0.0);
 loadingScene.add(leftBorder);
 
-var trackballControls = new TrackballControls(
-  cameraLoading,
-  renderer.domElement
-);
-
 var initialize = false;
 var resourcesLoaded = false;
 
