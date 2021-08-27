@@ -26,6 +26,9 @@ var renderer = initRenderer(); // View function in util/utils
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+/**
+ * Main camera, to airplane view
+*/
 var camera = new THREE.PerspectiveCamera(
   45,
   window.innerWidth / window.innerHeight,
@@ -38,18 +41,23 @@ camera.position.set(0.0, -90.0, 10.0);
 camera.lookAt(0.0, 0.0, 0.0);
 camera.up.set(0.0, 1.0, 0.0);
 
-var camera2 = new THREE.PerspectiveCamera(
+/**
+ * Sencondary camera, to inspection plane
+*/
+var inspecCamera = new THREE.PerspectiveCamera(
   45,
   window.innerWidth / window.innerHeight,
   0.1,
   10000
 );
 
-/* sets the position of the camera at the backward of the plane */
-camera2.position.set(0.0, -30.0, 10.0);
-camera2.lookAt(0.0, 0.0, 0.0);
-camera2.up.set(0.0, 1.0, 0.0);
+inspecCamera.position.set(0.0, -30.0, 10.0);
+inspecCamera.lookAt(0.0, 0.0, 0.0);
+inspecCamera.up.set(0.0, 1.0, 0.0);
 
+/**
+ * Inspection Scene
+*/
 var inspecScene = new THREE.Scene();
 initDefaultBasicLight(inspecScene);
 var aviaoInspec = new THREE.Object3D();
@@ -58,7 +66,7 @@ planeInspec.add(aviaoInspec);
 planeInspec.position.set(0, 0, 0);
 inspecScene.add(planeInspec);
 
-var trackballControls = new TrackballControls(camera2, renderer.domElement);
+var trackballControls = new TrackballControls(inspecCamera, renderer.domElement);
 
 // Listen window size changes
 window.addEventListener(
@@ -70,13 +78,7 @@ window.addEventListener(
 );
 
 /**
- * axis for reference
- */
-var axesHelper = new THREE.AxesHelper(20);
-scene.add(axesHelper);
-
-/**
- * Lights -> HemisphereLight, SpotLight and LightSphere (Sum)
+ * Lights -> HemisphereLight, Directional Light and LightSphere (Sum)
  */
 var sum = createLightSphere(
   scene,
@@ -88,16 +90,14 @@ var sum = createLightSphere(
 scene.add(sum);
 
 var dirLight = new THREE.DirectionalLight('rgb(255,255,150)');
-dirLight.position.set(0, 1, 0);
+dirLight.position.copy(new THREE.Vector3(100, 200, 100));
+dirLight.shadow.mapSize.width = 4092;
+dirLight.shadow.mapSize.height = 4092;
+dirLight.shadow.camera.left = -200;
+dirLight.shadow.camera.right = 200;
+dirLight.shadow.camera.top = 200;
+dirLight.shadow.camera.bottom = -200; 
 dirLight.castShadow = true;    
-dirLight.shadow.bias = -0.0001;
-dirLight.shadow.camera.far = 5500;
-dirLight.shadow.mapSize.width = 1024 * 6;
-dirLight.shadow.mapSize.height = 1024 * 6;
-dirLight.shadow.camera.left = -2500;
-dirLight.shadow.camera.right = 2500;
-dirLight.shadow.camera.top = 2500;
-dirLight.shadow.camera.bottom = -2500;   
 scene.add(dirLight);
 
 var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
@@ -122,6 +122,7 @@ scene.add(groundPlane);
  */
 var aviao = new THREE.Object3D();
 aviao.castShadow = true;
+aviao.receiveShadow = true;
 aviao.position.set(0, 0, 2);
 
 loadOBJFile('./assets/', '14 bis', 2, 0, true, aviao);
@@ -131,6 +132,7 @@ loadOBJFile('./assets/', '14 bis', 2, 0, true, aviao);
  */
 var track = generateTrack();
 track.castShadow = true;
+track.receiveShadow = true;
 scene.add(track);
 
 var checkpoints = createCheckpoints();
@@ -138,6 +140,7 @@ var checkpoints = createCheckpoints();
 for (let i = 0; i < checkpoints.length; i++) {
   var check = checkpoints[i];
   check.castShadow = true;
+  check.receiveShadow = true;
   scene.add(check);
 }
 
@@ -156,13 +159,6 @@ cameraHolder.position.set(0, -1000, 0);
 scene.add(cameraHolder);
 cameraHolder.add(camera);
 cameraHolder.add(aviao);
-
-var showInfoBox = false;
-
-if(showInfoBox) {
-  console.log(showInfoBox)
-  showInformation();
-}  
 
 var speedBox = new SecondaryBox('');
 
@@ -369,7 +365,6 @@ async function keyboardUpdate() {
   }
 }
 
-function showInformation() {
   // Use this to show information onscreen
   var controls = new InfoBox();
   controls.add('Controls');
@@ -382,7 +377,7 @@ function showInformation() {
   controls.add('Left / Right arrow to turn');
   controls.add('Enter to show/hide track');
   controls.show();
-}
+
 
 var cameraLoading = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 80);
 cameraLoading.position.set(0.0, -15.0, 20.0);
@@ -558,13 +553,20 @@ function loading() {
   timeBox.box.style.display = 'none';
   maxSpeedBox.box.style.display = 'none';
   checkBox.box.style.display = 'none';
-  showInfoBox = false;
-}
+
+  if(!resourcesLoaded) {
+    controls.infoBox.style.display = 'none';
+    console.log('none')
+  }  
+  else {
+    controls.infoBox.style.display = 'block';  
+    console.log('block')
+  } 
+} 
 
 function flightSim() {
   initialMessage.box.style.display = 'none';
   renderer.setClearColor('rgb(135, 206, 235)');
-  showInfoBox = true;
 }
 
 function render() {
@@ -577,7 +579,7 @@ function render() {
   } else {
     flightSim();
     if (sim) renderer.render(scene, camera);
-    else renderer.render(inspecScene, camera2);
+    else renderer.render(inspecScene, inspecCamera);
   }
   cameraCockpit();
   trackballControls.update();
