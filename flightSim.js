@@ -6,7 +6,7 @@ import {
   initRenderer,
   InfoBox,
   SecondaryBox,
-  createGroundPlaneWired,
+  createGroundPlane,
   onWindowResize,
   degreesToRadians,
   createLightSphere,
@@ -124,14 +124,14 @@ scene.add(light);
 /**
  * wireframe plan
  */
-var groundPlane = createGroundPlaneWired(
-  30000,
-  30000,
+var groundPlane = createGroundPlane(
+  10000,
+  10000,
   100,
   100,
   'rgb(34,139,34)'
 );
-groundPlane.rotateX(degreesToRadians(90));
+groundPlane.rotateX(degreesToRadians(0));
 groundPlane.receiveShadow = true;
 scene.add(groundPlane);
 
