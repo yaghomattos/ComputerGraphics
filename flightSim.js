@@ -105,15 +105,16 @@ scene.add(sum);
 
 var dirLight = new THREE.DirectionalLight('rgb(255,255,150)');
 dirLight.position.copy(new THREE.Vector3(100, 200, 100));
+dirLight.shadow.bias = 0.0001;
 dirLight.shadow.mapSize.width = 1024 * 20;
 dirLight.shadow.mapSize.height = 1024 * 20;
-dirLight.shadow.camera.left = -5000;
-dirLight.shadow.camera.right = 5000;
-dirLight.shadow.camera.top = 5000;
-dirLight.shadow.camera.bottom = -5000;
+dirLight.shadow.camera.left = -1500;
+dirLight.shadow.camera.right = 1500;
+dirLight.shadow.camera.top = 1500;
+dirLight.shadow.camera.bottom = -1500;
 dirLight.castShadow = true;
-dirLight.shadow.camera.near = -50000; // default
-dirLight.shadow.camera.far = 500000; // default
+dirLight.shadow.camera.near = -5000; // default
+dirLight.shadow.camera.far = 5000; // default
 
 scene.add(dirLight);
 
@@ -146,8 +147,8 @@ loadOBJFile('./assets/', '14 bis', 2, 0, true, aviao);
  * Track
  */
 var track = generateTrack();
-track.castShadow = true;
-track.receiveShadow = true;
+// track.castShadow = true;
+// track.receiveShadow = true;
 scene.add(track);
 
 
@@ -156,8 +157,8 @@ var checkpoints = createCheckpoints();
 
 for (let i = 0; i < checkpoints.length; i++) {
   var check = checkpoints[i];
-  check.castShadow = true;
-  check.receiveShadow = true;
+  // check.castShadow = true;
+  // check.receiveShadow = true;
   scene.add(check);
 }
 
