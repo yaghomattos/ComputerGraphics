@@ -10,7 +10,6 @@ import {
   onWindowResize,
   degreesToRadians,
   createLightSphere,
-  initDefaultBasicLight,
 } from '../libs/util/util.js';
 
 import { generateTrack, createCheckpoints, getRadius } from './track.js';
@@ -70,12 +69,36 @@ inspecCamera.up.set(0.0, 1.0, 0.0);
  * Inspection Scene
  */
 var inspecScene = new THREE.Scene();
-initDefaultBasicLight(inspecScene);
 var aviaoInspec = new THREE.Object3D();
 var planeInspec = new THREE.Object3D();
 planeInspec.add(aviaoInspec);
-planeInspec.position.set(0, 0, 0);
+planeInspec.position.set(-2, -3, 0);
+planeInspec.rotateX(degreesToRadians(90));
+planeInspec.rotateY(degreesToRadians(90));
 inspecScene.add(planeInspec);
+
+var light2 = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
+inspecScene.add(light2);
+
+var spotLight = new THREE.SpotLight('rgb(255,255,255)');
+spotLight.position.copy(new THREE.Vector3(10, 12, 2));
+spotLight.intensity = 0.5
+spotLight.distance = 0;
+spotLight.castShadow = true;
+spotLight.decay = 2;
+spotLight.penumbra = 0.8;
+spotLight.angle = degreesToRadians(60);
+planeInspec.add(spotLight);
+spotLight.target = planeInspec;
+
+var sphere = createLightSphere(
+  inspecScene,
+  0.2,
+  100,
+  100,
+  new THREE.Vector3(10, 12, 2)
+);
+planeInspec.add(sphere);
 
 var trackballControls = new TrackballControls(
   inspecCamera,
@@ -115,7 +138,6 @@ dirLight.shadow.camera.bottom = -1550;
 dirLight.castShadow = true;
 dirLight.shadow.camera.near = -5000; // default
 dirLight.shadow.camera.far = 5000; // default
-
 scene.add(dirLight);
 
 var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
@@ -124,13 +146,7 @@ scene.add(light);
 /**
  * wireframe plan
  */
-var groundPlane = createGroundPlane(
-  10000,
-  10000,
-  1,
-  1,
-  'rgb(34,139,34)'
-);
+var groundPlane = createGroundPlane(10000, 10000, 1, 1, 'rgb(34,139,34)');
 groundPlane.rotateX(degreesToRadians(0));
 groundPlane.receiveShadow = true;
 scene.add(groundPlane);
@@ -150,8 +166,6 @@ var track = generateTrack();
 // track.castShadow = true;
 // track.receiveShadow = true;
 scene.add(track);
-
-
 
 var checkpoints = createCheckpoints();
 
@@ -307,13 +321,14 @@ var latest = false;
 async function keyboardUpdate() {
   keyboard.update();
 
-  if (modeCam2) {
+  if (modeCam2 && initialize) {
     movement = false;
     /* invisible secondaryBox */
     speedBox.box.style.display = 'none';
     timeBox.box.style.display = 'none';
     maxSpeedBox.box.style.display = 'none';
     checkBox.box.style.display = 'none';
+    controls.infoBox.style.display = 'none';
   } else {
     /* visible secondaryBox */
     speedBox.box.style.display = 'block';
