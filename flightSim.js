@@ -228,6 +228,61 @@ function updateCheckedpoint() {
   );
 }
 
+function createSkybox() {  
+  let materialArray = [];
+  let texture_ft = new THREE.TextureLoader().load('../works/assets/skybox/arid2_ft.jpg');
+  let texture_bk = new THREE.TextureLoader().load('../works/assets/skybox/arid2_bk.jpg');
+  let texture_up = new THREE.TextureLoader().load('../works/assets/skybox/arid2_up.jpg');
+  let texture_dn = new THREE.TextureLoader().load('../works/assets/skybox/arid2_dn.jpg');
+  let texture_rt = new THREE.TextureLoader().load('../works/assets/skybox/arid2_rt.jpg');
+  let texture_lf = new THREE.TextureLoader().load('../works/assets/skybox/arid2_lf.jpg');
+    
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_up }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_dn }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_rt }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_lf }));
+
+  for (let i = 0; i < 6; i++)
+     materialArray[i].side = THREE.BackSide;
+     
+  let skyboxGeo = new THREE.BoxGeometry(20000, 15000, 15000);
+  let skybox = new THREE.Mesh( skyboxGeo, materialArray );
+  skybox.rotation.x = Math.PI/2
+  skybox.translateX(-3000)
+  skybox.rotation.y = Math.PI/2
+  scene.add( skybox );  
+}
+
+function createSkyboxAlt() {  
+  let materialArray = [];
+  let texture_ft = new THREE.TextureLoader().load('../works/assets/skybox_alt/bluecloud_ft.jpg');
+  let texture_bk = new THREE.TextureLoader().load('../works/assets/skybox_alt/bluecloud_bk.jpg');
+  let texture_up = new THREE.TextureLoader().load('../works/assets/skybox_alt/bluecloud_up.jpg');
+  let texture_dn = new THREE.TextureLoader().load('../works/assets/skybox_alt/bluecloud_dn.jpg');
+  let texture_rt = new THREE.TextureLoader().load('../works/assets/skybox_alt/bluecloud_rt.jpg');
+  let texture_lf = new THREE.TextureLoader().load('../works/assets/skybox_alt/bluecloud_lf.jpg');
+    
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_up }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_dn }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_rt }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_lf }));
+
+  for (let i = 0; i < 6; i++)
+     materialArray[i].side = THREE.BackSide;
+     
+  let skyboxGeo = new THREE.BoxGeometry(20000, 15000, 15000);
+  let skybox = new THREE.Mesh( skyboxGeo, materialArray );
+  skybox.rotation.x = Math.PI/2
+  skybox.rotation.y = Math.PI/2
+  scene.add( skybox );  
+}
+
+createSkybox();
+
 var sim = true;
 var cockpit = false;
 
