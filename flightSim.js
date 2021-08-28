@@ -108,10 +108,10 @@ dirLight.position.copy(new THREE.Vector3(100, 200, 100));
 dirLight.shadow.bias = 0.0001;
 dirLight.shadow.mapSize.width = 1024 * 20;
 dirLight.shadow.mapSize.height = 1024 * 20;
-dirLight.shadow.camera.left = -1500;
-dirLight.shadow.camera.right = 1500;
-dirLight.shadow.camera.top = 1500;
-dirLight.shadow.camera.bottom = -1500;
+dirLight.shadow.camera.left = -1550;
+dirLight.shadow.camera.right = 1550;
+dirLight.shadow.camera.top = 1550;
+dirLight.shadow.camera.bottom = -1550;
 dirLight.castShadow = true;
 dirLight.shadow.camera.near = -5000; // default
 dirLight.shadow.camera.far = 5000; // default
@@ -127,8 +127,8 @@ scene.add(light);
 var groundPlane = createGroundPlane(
   10000,
   10000,
-  100,
-  100,
+  1,
+  1,
   'rgb(34,139,34)'
 );
 groundPlane.rotateX(degreesToRadians(0));
