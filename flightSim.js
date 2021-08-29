@@ -182,6 +182,10 @@ for (let i = 0; i < checkpoints.length; i++) {
 var cenario = new THREE.Object3D();
 loadOBJFile('./assets/', 'cenario', 2, 0, true, cenario);
 
+
+var cidade = new THREE.Object3D();
+loadOBJFile('./assets/', 'cidade', 2, 0, true, cidade);
+
 /**
  * simple object to controll camera
  */
@@ -612,6 +616,18 @@ function loadOBJFile(modelPath, modelName, visibility) {
         scene.add(obj);
         // console.log('adicionado à cena');
       }
+
+      if (modelName == 'cidade') {
+        // console.log('começando a adicionar');
+        obj.rotateX(Math.PI / 2);
+        obj.rotateY((-Math.PI * 2) / 3 + Math.PI / 2 - Math.PI / 6);
+        obj.translateZ(-600);
+        obj.translateX(-200);
+        scene.add(obj);
+        // console.log('adicionado à cena');
+      }
+
+
       if (modelName == '14 bis') {
         // console.log('adicionando ao objeto');
         aviao.add(obj);
