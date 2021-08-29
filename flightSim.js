@@ -46,6 +46,13 @@ var camera = new THREE.PerspectiveCamera(
   1000000
 );
 
+var listener = new THREE.AudioListener();
+  camera.add(listener);
+const sound = new THREE.Audio(listener);  
+const sound1 = new THREE.Audio(listener);  
+const sound2 = new THREE.Audio(listener);  
+const sound3 = new THREE.Audio(listener);  
+
 /* sets the position of the camera at the backward of the plane */
 camera.position.set(0.0, -90.0, 10.0);
 camera.lookAt(0.0, 0.0, 0.0);
@@ -114,6 +121,34 @@ window.addEventListener(
   false
 );
 
+// Sound Effects
+var playMusic = false;
+var playPlaneSound = false;
+var firstMove = true;
+
+var audioLoader = new THREE.AudioLoader();
+audioLoader.load( '../works/assets/FlightSimulatorTheme.mp3', function( buffer ) {
+	sound.setBuffer(buffer);
+	sound.setLoop( true );
+	sound.setVolume( 0.5 );
+});
+
+audioLoader.load( '../works/assets/planeSound.mp3', function ( buffer ) {
+  sound1.setBuffer(buffer);  
+	sound1.setLoop( true );
+	sound1.setVolume(0.3);
+});
+
+audioLoader.load( '../works/assets/checkpoint.mp3', function ( buffer ) {
+  sound2.setBuffer(buffer);
+	sound2.setVolume(0.7);
+});
+
+audioLoader.load( '../works/assets/endgame.mp3', function ( buffer ) {
+  sound3.setBuffer(buffer);
+	sound3.setVolume(0.6);
+});
+
 /**
  * Lights -> HemisphereLight, Directional Light and LightSphere (Sum)
  */
@@ -144,9 +179,9 @@ var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
 scene.add(light);
 
 /**
- * wireframe plan
+ * plan
  */
-var groundPlane = createGroundPlane(10000, 10000, 1, 1, 'rgb(34,139,34)');
+var groundPlane = createGroundPlane(20000, 20000, 1, 1, 'rgb(34,139,34)');
 groundPlane.rotateX(degreesToRadians(0));
 groundPlane.receiveShadow = true;
 scene.add(groundPlane);
@@ -240,20 +275,22 @@ function updateSpeed() {
 
 var checkpointsCount = 0;
 
-function updateCheckedpoint() {
+function updateCheckedpoint(checkPointIndex) {
   checkBox.changeMessage(
     'Checkpoint(s): ' + checkpointsCount + '/' + checkpoints.length
   );
+  if(checkPointIndex != 12)
+    sound2.play();
 }
 
 function createSkybox() {  
   let materialArray = [];
-  let texture_ft = new THREE.TextureLoader().load('../flightSim/assets/skybox/arid2_ft.jpg');
-  let texture_bk = new THREE.TextureLoader().load('../flightSim/assets/skybox/arid2_bk.jpg');
-  let texture_up = new THREE.TextureLoader().load('../flightSim/assets/skybox/arid2_up.jpg');
-  let texture_dn = new THREE.TextureLoader().load('../flightSim/assets/skybox/arid2_dn.jpg');
-  let texture_rt = new THREE.TextureLoader().load('../flightSim/assets/skybox/arid2_rt.jpg');
-  let texture_lf = new THREE.TextureLoader().load('../flightSim/assets/skybox/arid2_lf.jpg');
+  let texture_ft = new THREE.TextureLoader().load('../works/assets/skybox/arid2_ft.jpg');
+  let texture_bk = new THREE.TextureLoader().load('../works/assets/skybox/arid2_bk.jpg');
+  let texture_up = new THREE.TextureLoader().load('../works/assets/skybox/arid2_up.jpg');
+  let texture_dn = new THREE.TextureLoader().load('../works/assets/skybox/arid2_dn.jpg');
+  let texture_rt = new THREE.TextureLoader().load('../works/assets/skybox/arid2_rt.jpg');
+  let texture_lf = new THREE.TextureLoader().load('../works/assets/skybox/arid2_lf.jpg');
     
   materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
   materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
@@ -325,6 +362,18 @@ var latest = false;
 async function keyboardUpdate() {
   keyboard.update();
 
+  if(playMusic)  
+  {
+    sound.play();
+    playMusic = false;
+  }   
+
+  if(playPlaneSound && firstMove)     
+  {
+    sound1.play();
+    firstMove = false;
+  } 
+
   if (modeCam2 && initialize) {
     movement = false;
     /* invisible secondaryBox */
@@ -365,19 +414,20 @@ async function keyboardUpdate() {
         updateTime();
         if (checkpoints[i].visible == true) {
           checkpointsCount++;
-          updateCheckedpoint();
+          updateCheckedpoint(i);
         }
         checkpoints[i].visible = false;
       } else {
         if (checkpoints[i].visible == true) {
           checkpointsCount++;
-          updateCheckedpoint();
+          updateCheckedpoint(i);
         }
         checkpoints[i].visible = false;
       }
     }
     if (!checkpoints[12].visible && !latest) {
       updateTime(stop);
+      sound3.play();
       latest = true;
     }
   }
@@ -413,8 +463,9 @@ async function keyboardUpdate() {
 
   if (keyboard.pressed('Q') && mult < 6.4) {
     mult += 0.1;
-    updateSpeed();
+    updateSpeed();   
     movement = true;
+    playPlaneSound = true;
   }
   if (keyboard.pressed('A') && mult > 2.1) {
     mult -= 0.1;
@@ -520,6 +571,7 @@ var resourcesLoaded = false;
 function checkInit() {
   if (resourcesLoaded && keyboard.down('enter')) {
     initialize = true;
+    playMusic = true;
   }
 }
 
