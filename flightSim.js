@@ -33,6 +33,8 @@ cameraLoading.up.set(0.0, 1.0, 0.0);
 var loadingScene = new THREE.Scene();
 loadingScene.add(new THREE.AmbientLight(0xffffff));
 
+var firstRendering = true;
+
 /* Create main scene */
 var scene = new THREE.Scene();
 
@@ -150,33 +152,25 @@ audioLoader.load( './assets/endgame.mp3', function ( buffer ) {
 });
 
 /**
- * Lights -> HemisphereLight, Directional Light and LightSphere (Sum)
+ * Lights -> HemisphereLight, Directional Light and Dynamic Light
  */
-var sum = createLightSphere(
-  scene,
-  1000,
-  100,
-  100,
-  new THREE.Vector3(10000, 25000, 5000)
-);
-scene.add(sum);
+
+ var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
+ scene.add(light);
 
 var dirLight = new THREE.DirectionalLight('rgb(255,255,150)');
 dirLight.position.copy(new THREE.Vector3(100, 200, 100));
 dirLight.shadow.bias = 0.0001;
-dirLight.shadow.mapSize.width = 1024 * 20;
-dirLight.shadow.mapSize.height = 1024 * 20;
-dirLight.shadow.camera.left = -1550;
-dirLight.shadow.camera.right = 1550;
-dirLight.shadow.camera.top = 1550;
-dirLight.shadow.camera.bottom = -1550;
+dirLight.shadow.mapSize.width = 1024 * 30;
+dirLight.shadow.mapSize.height = 1024 * 30;
+dirLight.shadow.camera.left = -3000;
+dirLight.shadow.camera.right = 3000;
+dirLight.shadow.camera.top = 3000;
+dirLight.shadow.camera.bottom = -3000;
 dirLight.castShadow = true;
-dirLight.shadow.camera.near = -5000; // default
-dirLight.shadow.camera.far = 5000; // default
+dirLight.shadow.camera.near = -6000;
+dirLight.shadow.camera.far = 6000;
 scene.add(dirLight);
-
-var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
-scene.add(light);
 
 var dynamicLight = new THREE.DirectionalLight('rgb(255,255,150)');
 dynamicLight.intensity = 0.8; // No need to iluminate, just used to drop shadow.
@@ -240,14 +234,18 @@ var cidade = new THREE.Object3D();
 loadOBJFile('./assets/cenario/', 'cidade', 2, 0, true, cidade);
 
 /**
- * simple object to controll camera
+ * Object to controll camera
  */
 var cameraHolder = new THREE.Object3D();
-cameraHolder.position.set(0, -1000, 0);
+cameraHolder.position.set(3100, 3500, 0);
+cameraHolder.rotateZ(degreesToRadians(145))
 scene.add(cameraHolder);
 cameraHolder.add(camera);
 cameraHolder.add(aviao);
 
+/**
+ * Information boxes
+*/
 var speedBox = new SecondaryBox('');
 
 var maxSpeedBox = new SecondaryBox('');
@@ -273,7 +271,7 @@ render();
 var timer = new THREE.Clock();
 var delta = 0;
 
-function updateTime(stop) {
+function updateTime() {
   if (latest) timer.stop();
   delta += timer.getDelta();
   timeBox.changeMessage(' Time: ' + delta.toFixed(2));
@@ -291,6 +289,9 @@ function updateSpeed() {
   }
 }
 
+/**
+ * Checkpoints update
+ */
 var checkpointsCount = 0;
 
 function updateCheckedpoint(checkPointIndex) {
@@ -301,6 +302,9 @@ function updateCheckedpoint(checkPointIndex) {
     sound2.play();
 }
 
+/**
+ * Skybox
+ */
 function createSkybox() {  
   let materialArray = [];
   let texture_ft = new THREE.TextureLoader().load('./assets/skybox/arid2_ft.jpg');
@@ -356,6 +360,9 @@ function createSkyboxAlt() {
 
 createSkybox();
 
+/**
+ * Control cockpit camera
+*/
 var sim = true;
 var cockpit = false;
 
@@ -365,12 +372,14 @@ function cameraCockpit() {
   } else camera.position.set(0, -30, 10);
 }
 
+/* Variables to control */
 const speed = 1.0; /* sets the initial speed */
 var mult = 2; /* sets initial speed multiplication */
 var movement = false; /* movement check */
 var angularSpeedVertical = 0.317;
 var angularSpeedHorizontal = 0.00238;
 
+/*  */
 var animation = degreesToRadians(0.1587);
 var modeCam2 = false;
 var started = false;
@@ -535,8 +544,9 @@ async function keyboardUpdate() {
   }
 }
 
-// Use this to show information onscreen
-
+/**
+ * Message to controls
+ */
 var controls = new InfoBox();
 controls.add('Controls');
 controls.addParagraph();
@@ -550,8 +560,9 @@ controls.add('Enter to show/hide track');
 controls.show();
 controls.infoBox.style.display = 'none';
 
-var firstRendering = true;
-
+/**
+ * Loading screen objects
+ */
 function createSlider(a, b, c) {
   var sliderGeometry = new THREE.BoxGeometry(5, 3.5, 0.5);
   var sliderMaterial = new THREE.MeshPhongMaterial({
@@ -593,6 +604,9 @@ function checkInit() {
   }
 }
 
+/**
+ * Loading resources
+ */
 function loadOBJFile(modelPath, modelName, visibility) {
   // console.log('começando');
   var manager = new THREE.LoadingManager();
@@ -681,8 +695,8 @@ function loadOBJFile(modelPath, modelName, visibility) {
         // console.log('começando a adicionar');
         obj.rotateX(degreesToRadians(90));
         // obj.rotateY((-Math.PI * 2) / 3 + Math.PI / 2 - Math.PI / 6);
-        // obj.translateZ(-600);
-        // obj.translateX(-200);
+        obj.translateZ(1000);
+        obj.translateX(-200);
         obj.translateY(0.1);
         scene.add(obj);
         // console.log('adicionado à cena');
@@ -730,7 +744,7 @@ function flightSim() {
   initialMessage.box.style.display = 'none';
   renderer.setClearColor('rgb(135, 206, 235)');
   lightFollowTarget();
-  dirLight.shadow.autoUpdate = true;
+  //dirLight.shadow.autoUpdate = true;
 }
 
 function render() {
@@ -743,9 +757,8 @@ function render() {
   } else {
     if (firstRendering) {
       controls.infoBox.style.display = 'block';
-      dirLight.shadow.autoUpdate = false;
+      //dirLight.shadow.autoUpdate = false;
       scene.add(dynamicLight);
-      //scene.add(aviao);
       firstRendering = false;
     }
     flightSim();
