@@ -163,6 +163,7 @@ scene.add(sum);
 
 var dirLight = new THREE.DirectionalLight('rgb(255,255,150)');
 dirLight.position.copy(new THREE.Vector3(100, 200, 100));
+dirLight.shadow.bias = 0.0001;
 dirLight.shadow.mapSize.width = 1024 * 20;
 dirLight.shadow.mapSize.height = 1024 * 20;
 dirLight.shadow.camera.left = -1550;
@@ -202,11 +203,10 @@ function lightFollowTarget()
 }
 
 /**
- * plan
+ * Plane 9x
  */
 var groundPlane = createGroundPlane(20000, 20000, 1, 1, 'rgb(130,130,130)')
 groundPlane.rotateX(degreesToRadians(0));
-groundPlane.receiveShadow = true;
 scene.add(groundPlane);
 
 /**
@@ -683,7 +683,7 @@ function loadOBJFile(modelPath, modelName, visibility) {
         // obj.rotateY((-Math.PI * 2) / 3 + Math.PI / 2 - Math.PI / 6);
         // obj.translateZ(-600);
         // obj.translateX(-200);
-        obj.translateY(0.2);
+        obj.translateY(0.1);
         scene.add(obj);
         // console.log('adicionado à cena');
       }
@@ -730,6 +730,7 @@ function flightSim() {
   initialMessage.box.style.display = 'none';
   renderer.setClearColor('rgb(135, 206, 235)');
   lightFollowTarget();
+  dirLight.shadow.autoUpdate = true;
 }
 
 function render() {
