@@ -24,9 +24,9 @@ var cameraLoading = new THREE.PerspectiveCamera(
   45,
   window.innerWidth / window.innerHeight,
   0.1,
-  80
+  8000
 );
-cameraLoading.position.set(0.0, -15.0, 20.0);
+cameraLoading.position.set(0, -75, 0);
 cameraLoading.lookAt(0.0, 0.0, 0.0);
 cameraLoading.up.set(0.0, 1.0, 0.0);
 
@@ -265,7 +265,7 @@ var checkBox = new SecondaryBox('');
 checkBox.box.style.bottom = '100px';
 
 var initialMessage = new SecondaryBox('loading 0%...');
-initialMessage.box.style.backgroundColor = 'rgba(0,0,0,0)';
+initialMessage.box.style.backgroundColor = 'rgba(0,0,0)';
 initialMessage.box.style.left = '27%';
 initialMessage.box.style.bottom = '30%';
 
@@ -576,6 +576,7 @@ function createSlider(a, b, c) {
   });
   var slider = new THREE.Mesh(sliderGeometry, sliderMaterial);
   slider.position.set(a, b, c);
+  slider.rotateX(degreesToRadians(90))
   return slider;
 }
 
@@ -586,19 +587,32 @@ var borderGeometry = new THREE.BoxGeometry(20, 0.5, 0.3);
 var bottomBorder = new THREE.Mesh(borderGeometry, borderMaterial);
 bottomBorder.position.set(0.0, 0.0, 0.0);
 loadingScene.add(bottomBorder);
+bottomBorder.rotateX(degreesToRadians(90))
+bottomBorder.translateY(2)
 
 var topBorder = new THREE.Mesh(borderGeometry, borderMaterial);
-topBorder.position.set(0.0, 4.0, 0.0);
+topBorder.position.set(0.0, 0.0, 0.0);
 loadingScene.add(topBorder);
+topBorder.rotateX(degreesToRadians(90))
+topBorder.translateY(-2)
 
 var borderGeometry2 = new THREE.BoxGeometry(0.5, 4.5, 0.3);
 var rightBorder = new THREE.Mesh(borderGeometry2, borderMaterial);
 rightBorder.position.set(10, 2.0, 0.0);
 loadingScene.add(rightBorder);
+rightBorder.rotateX(degreesToRadians(90))
 
 var leftBorder = new THREE.Mesh(borderGeometry2, borderMaterial);
 leftBorder.position.set(-10, 2.0, 0.0);
 loadingScene.add(leftBorder);
+leftBorder.rotateX(degreesToRadians(90))
+
+const texture = new THREE.TextureLoader().load( "./assets/background.jpg" );
+var material = new THREE.MeshBasicMaterial({ map: texture })
+let backgroundGeo = new THREE.BoxGeometry(window.innerWidth/12, window.innerHeight/12 , -5);
+let background = new THREE.Mesh( backgroundGeo, material );
+loadingScene.add(background) 
+background.rotateX(degreesToRadians(90))
 
 var initialize = false;
 var resourcesLoaded = false;
