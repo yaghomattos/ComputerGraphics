@@ -127,24 +127,24 @@ var playPlaneSound = false;
 var firstMove = true;
 
 var audioLoader = new THREE.AudioLoader();
-audioLoader.load( '../works/assets/FlightSimulatorTheme.mp3', function( buffer ) {
+audioLoader.load( './assets/FlightSimulatorTheme.mp3', function( buffer ) {
 	sound.setBuffer(buffer);
 	sound.setLoop( true );
 	sound.setVolume( 0.5 );
 });
 
-audioLoader.load( '../works/assets/planeSound.mp3', function ( buffer ) {
+audioLoader.load( './assets/planeSound.mp3', function ( buffer ) {
   sound1.setBuffer(buffer);  
 	sound1.setLoop( true );
 	sound1.setVolume(0.3);
 });
 
-audioLoader.load( '../works/assets/checkpoint.mp3', function ( buffer ) {
+audioLoader.load( './assets/checkpoint.mp3', function ( buffer ) {
   sound2.setBuffer(buffer);
 	sound2.setVolume(0.7);
 });
 
-audioLoader.load( '../works/assets/endgame.mp3', function ( buffer ) {
+audioLoader.load( './assets/endgame.mp3', function ( buffer ) {
   sound3.setBuffer(buffer);
 	sound3.setVolume(0.6);
 });
@@ -163,7 +163,6 @@ scene.add(sum);
 
 var dirLight = new THREE.DirectionalLight('rgb(255,255,150)');
 dirLight.position.copy(new THREE.Vector3(100, 200, 100));
-dirLight.shadow.bias = 0.0001;
 dirLight.shadow.mapSize.width = 1024 * 20;
 dirLight.shadow.mapSize.height = 1024 * 20;
 dirLight.shadow.camera.left = -1550;
@@ -178,10 +177,34 @@ scene.add(dirLight);
 var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
 scene.add(light);
 
+var dynamicLight = new THREE.DirectionalLight('rgb(255,255,150)');
+dynamicLight.intensity = 0.8; // No need to iluminate, just used to drop shadow.
+dynamicLight.position.set(-10, -20, 30);
+dynamicLight.shadow.mapSize.width = 1024;
+dynamicLight.shadow.mapSize.height = 1024;
+dynamicLight.castShadow = true;
+dynamicLight.shadow.camera.left = -100;
+dynamicLight.shadow.camera.right = 100;
+dynamicLight.shadow.camera.top = 100;
+dynamicLight.shadow.camera.bottom = -100;
+
+function lightFollowTarget() 
+{
+  dynamicLight.shadow.camera.updateProjectionMatrix();     
+  
+  dynamicLight.target.position.set(
+    cameraHolder.position.x,
+    cameraHolder.position.y,
+    cameraHolder.position.z
+  );   
+
+  dynamicLight.target.updateMatrixWorld();
+}
+
 /**
  * plan
  */
-var groundPlane = createGroundPlane(20000, 20000, 1, 1, 'rgb(34,139,34)');
+var groundPlane = createGroundPlane(20000, 20000, 1, 1, 'rgb(130,130,130)')
 groundPlane.rotateX(degreesToRadians(0));
 groundPlane.receiveShadow = true;
 scene.add(groundPlane);
@@ -190,8 +213,7 @@ scene.add(groundPlane);
  * airplane
  */
 var aviao = new THREE.Object3D();
-aviao.position.set(0, 0, 2);
-
+aviao.position.set(0, -0.5, 2);
 loadOBJFile('./assets/14 bis/', '14 bis', 2, 0, true, aviao);
 
 /**
@@ -212,13 +234,8 @@ for (let i = 0; i < checkpoints.length; i++) {
 }
 
 /**
- * cenario
- */
-/*
-var cenario = new THREE.Object3D();
-loadOBJFile('./assets/', 'cenario', 2, 0, true, cenario);
+ * City
 */
-
 var cidade = new THREE.Object3D();
 loadOBJFile('./assets/cenario/', 'cidade', 2, 0, true, cidade);
 
@@ -286,12 +303,12 @@ function updateCheckedpoint(checkPointIndex) {
 
 function createSkybox() {  
   let materialArray = [];
-  let texture_ft = new THREE.TextureLoader().load('../works/assets/skybox/arid2_ft.jpg');
-  let texture_bk = new THREE.TextureLoader().load('../works/assets/skybox/arid2_bk.jpg');
-  let texture_up = new THREE.TextureLoader().load('../works/assets/skybox/arid2_up.jpg');
-  let texture_dn = new THREE.TextureLoader().load('../works/assets/skybox/arid2_dn.jpg');
-  let texture_rt = new THREE.TextureLoader().load('../works/assets/skybox/arid2_rt.jpg');
-  let texture_lf = new THREE.TextureLoader().load('../works/assets/skybox/arid2_lf.jpg');
+  let texture_ft = new THREE.TextureLoader().load('./assets/skybox/arid2_ft.jpg');
+  let texture_bk = new THREE.TextureLoader().load('./assets/skybox/arid2_bk.jpg');
+  let texture_up = new THREE.TextureLoader().load('./assets/skybox/arid2_up.jpg');
+  let texture_dn = new THREE.TextureLoader().load('./assets/skybox/arid2_dn.jpg');
+  let texture_rt = new THREE.TextureLoader().load('./assets/skybox/arid2_rt.jpg');
+  let texture_lf = new THREE.TextureLoader().load('./assets/skybox/arid2_lf.jpg');
     
   materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
   materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
@@ -313,12 +330,12 @@ function createSkybox() {
 
 function createSkyboxAlt() {  
   let materialArray = [];
-  let texture_ft = new THREE.TextureLoader().load('../flightSim/assets/skybox_alt/bluecloud_ft.jpg');
-  let texture_bk = new THREE.TextureLoader().load('../flightSim/assets/skybox_alt/bluecloud_bk.jpg');
-  let texture_up = new THREE.TextureLoader().load('../flightSim/assets/skybox_alt/bluecloud_up.jpg');
-  let texture_dn = new THREE.TextureLoader().load('../flightSim/assets/skybox_alt/bluecloud_dn.jpg');
-  let texture_rt = new THREE.TextureLoader().load('../flightSim/assets/skybox_alt/bluecloud_rt.jpg');
-  let texture_lf = new THREE.TextureLoader().load('../flightSim/assets/skybox_alt/bluecloud_lf.jpg');
+  let texture_ft = new THREE.TextureLoader().load('./assets/skybox_alt/bluecloud_ft.jpg');
+  let texture_bk = new THREE.TextureLoader().load('./assets/skybox_alt/bluecloud_bk.jpg');
+  let texture_up = new THREE.TextureLoader().load('./assets/skybox_alt/bluecloud_up.jpg');
+  let texture_dn = new THREE.TextureLoader().load('./assets/skybox_alt/bluecloud_dn.jpg');
+  let texture_rt = new THREE.TextureLoader().load('./assets/skybox_alt/bluecloud_rt.jpg');
+  let texture_lf = new THREE.TextureLoader().load('./assets/skybox_alt/bluecloud_lf.jpg');
     
   materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
   materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
@@ -660,22 +677,13 @@ function loadOBJFile(modelPath, modelName, visibility) {
       // console.log('obj: ');
       // console.log(obj);
 
-      if (modelName == 'cenario') {
-        // console.log('começando a adicionar');
-        obj.rotateX(Math.PI / 2);
-        obj.rotateY((-Math.PI * 2) / 3 + Math.PI / 2 - Math.PI / 6);
-        obj.translateZ(-600);
-        obj.translateX(-200);
-        scene.add(obj);
-        // console.log('adicionado à cena');
-      }
-
       if (modelName == 'cidade') {
         // console.log('começando a adicionar');
-        obj.rotateX(Math.PI / 2);
-        obj.rotateY((-Math.PI * 2) / 3 + Math.PI / 2 - Math.PI / 6);
-        obj.translateZ(-600);
-        obj.translateX(-200);
+        obj.rotateX(degreesToRadians(90));
+        // obj.rotateY((-Math.PI * 2) / 3 + Math.PI / 2 - Math.PI / 6);
+        // obj.translateZ(-600);
+        // obj.translateX(-200);
+        obj.translateY(0.2);
         scene.add(obj);
         // console.log('adicionado à cena');
       }
@@ -721,6 +729,7 @@ function loading() {
 function flightSim() {
   initialMessage.box.style.display = 'none';
   renderer.setClearColor('rgb(135, 206, 235)');
+  lightFollowTarget();
 }
 
 function render() {
@@ -733,6 +742,9 @@ function render() {
   } else {
     if (firstRendering) {
       controls.infoBox.style.display = 'block';
+      dirLight.shadow.autoUpdate = false;
+      scene.add(dynamicLight);
+      //scene.add(aviao);
       firstRendering = false;
     }
     flightSim();
