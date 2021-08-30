@@ -192,7 +192,7 @@ scene.add(groundPlane);
 var aviao = new THREE.Object3D();
 aviao.position.set(0, 0, 2);
 
-loadOBJFile('./assets/', '14 bis', 2, 0, true, aviao);
+loadOBJFile('./assets/14 bis/', '14 bis', 2, 0, true, aviao);
 
 /**
  * Track
@@ -343,7 +343,7 @@ var cockpit = false;
 
 function cameraCockpit() {
   if (cockpit) {
-    camera.position.set(0, 0.5, 4);
+    camera.position.set(0, -0.2, 3);
   } else camera.position.set(0, -30, 10);
 }
 
