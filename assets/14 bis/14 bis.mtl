@@ -1,19 +1,6 @@
 # Blender MTL File: 'aviao _final.blend'
 # Material Count: 4
 
-newmtl Basket
-Ns 225.000000
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 3
-map_Bump -bm 10.000000 -s 4.000000 4.000000 1.000000 TexturesCom_Metal_Mesh_1K_height.png
-map_Kd -s 4.000000 4.000000 1.000000 TexturesCom_Metal_Mesh_1K_albedo-TexturesCom_Metal_Mesh_1K_alpha.png
-map_d -s 4.000000 4.000000 1.000000 TexturesCom_Metal_Mesh_1K_albedo-TexturesCom_Metal_Mesh_1K_alpha.png
-
 newmtl Material.002
 Ns 0.000000
 Ka 1.000000 1.000000 1.000000
