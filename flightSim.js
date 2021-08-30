@@ -214,12 +214,13 @@ for (let i = 0; i < checkpoints.length; i++) {
 /**
  * cenario
  */
+/*
 var cenario = new THREE.Object3D();
 loadOBJFile('./assets/', 'cenario', 2, 0, true, cenario);
-
+*/
 
 var cidade = new THREE.Object3D();
-loadOBJFile('./assets/', 'cidade', 2, 0, true, cidade);
+loadOBJFile('./assets/cenario/', 'cidade', 2, 0, true, cidade);
 
 /**
  * simple object to controll camera
