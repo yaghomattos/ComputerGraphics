@@ -361,7 +361,7 @@ var cockpit = false;
 
 function cameraCockpit() {
   if (cockpit) {
-    camera.position.set(0, -0.2, 3);
+    camera.position.set(0, -0.8, 3);
   } else camera.position.set(0, -30, 10);
 }
 
