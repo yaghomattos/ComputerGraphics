@@ -199,9 +199,15 @@ function lightFollowTarget()
 /**
  * Plane 9x
  */
-var groundPlane = createGroundPlane(20000, 20000, 1, 1, 'rgb(130,130,130)')
-groundPlane.rotateX(degreesToRadians(0));
+var groundPlane = createGroundPlane(40500, 40500, 1, 1, 'rgb(130,130,130)')
+groundPlane.receiveShadow = false;
 scene.add(groundPlane);
+
+var cityPlane = createGroundPlane(4500, 4500, 1, 1, 'rgb(200,100,100)')
+cityPlane.translateZ(0.1);
+cityPlane.translateX(200);
+cityPlane.translateY(-700);
+scene.add(cityPlane);
 
 /**
  * airplane
@@ -324,7 +330,7 @@ function createSkybox() {
   for (let i = 0; i < 6; i++)
      materialArray[i].side = THREE.BackSide;
      
-  let skyboxGeo = new THREE.BoxGeometry(20000, 15000, 15000);
+  let skyboxGeo = new THREE.BoxGeometry(40500, 40500, 40500);
   let skybox = new THREE.Mesh( skyboxGeo, materialArray );
   skybox.rotation.x = Math.PI/2
   skybox.translateX(-3000)
@@ -697,7 +703,7 @@ function loadOBJFile(modelPath, modelName, visibility) {
         // obj.rotateY((-Math.PI * 2) / 3 + Math.PI / 2 - Math.PI / 6);
         obj.translateZ(1000);
         obj.translateX(-200);
-        obj.translateY(0.1);
+        obj.translateY(0.2);
         scene.add(obj);
         // console.log('adicionado à cena');
       }
