@@ -155,10 +155,10 @@ audioLoader.load( './assets/endgame.mp3', function ( buffer ) {
  * Lights -> HemisphereLight, Directional Light and Dynamic Light
  */
 
- var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b);
+ var light = new THREE.HemisphereLight(0xffffff, 0x2b2b2b, 1);
  scene.add(light);
 
-var dirLight = new THREE.DirectionalLight('rgb(255,255,150)');
+var dirLight = new THREE.DirectionalLight();
 dirLight.position.copy(new THREE.Vector3(100, 200, 100));
 dirLight.shadow.bias = 0.0001;
 dirLight.shadow.mapSize.width = 1024 * 30;
@@ -172,7 +172,7 @@ dirLight.shadow.camera.near = -6000;
 dirLight.shadow.camera.far = 6000;
 scene.add(dirLight);
 
-var dynamicLight = new THREE.DirectionalLight('rgb(255,255,150)');
+var dynamicLight = new THREE.DirectionalLight();
 dynamicLight.intensity = 0.8; // No need to iluminate, just used to drop shadow.
 dynamicLight.position.set(-10, -20, 30);
 dynamicLight.shadow.mapSize.width = 1024;
@@ -204,10 +204,13 @@ groundPlane.receiveShadow = false;
 scene.add(groundPlane);
 
 var cityPlane = createGroundPlane(4500, 4500, 1, 1, 'rgb(200,100,100)')
-cityPlane.translateZ(0.1);
+cityPlane.translateZ(5);
 cityPlane.translateX(200);
 cityPlane.translateY(-700);
 scene.add(cityPlane);
+
+// var cityPlane = new THREE.Object3D();
+// loadOBJFile('./assets/plano base/', 'plano', 2, 0, true, cityPlane);
 
 /**
  * airplane
@@ -237,13 +240,13 @@ for (let i = 0; i < checkpoints.length; i++) {
  * City
 */
 var cidade = new THREE.Object3D();
-loadOBJFile('./assets/cenario/', 'cidade', 2, 0, true, cidade);
+loadOBJFile('./assets/cenario att 3/', 'cidade', 2, 0, true, cidade);
 
 /**
  * Object to controll camera
  */
 var cameraHolder = new THREE.Object3D();
-cameraHolder.position.set(1458, 10, 0);
+cameraHolder.position.set(1458, 10, 5);
 cameraHolder.rotateZ(degreesToRadians(-328))
 scene.add(cameraHolder);
 cameraHolder.add(camera);
@@ -338,32 +341,6 @@ function createSkybox() {
   scene.add( skybox );  
   skybox.castShadow = false;
   skybox.receiveShadow = false;
-}
-
-function createSkyboxAlt() {  
-  let materialArray = [];
-  let texture_ft = new THREE.TextureLoader().load('./assets/skybox_alt/bluecloud_ft.jpg');
-  let texture_bk = new THREE.TextureLoader().load('./assets/skybox_alt/bluecloud_bk.jpg');
-  let texture_up = new THREE.TextureLoader().load('./assets/skybox_alt/bluecloud_up.jpg');
-  let texture_dn = new THREE.TextureLoader().load('./assets/skybox_alt/bluecloud_dn.jpg');
-  let texture_rt = new THREE.TextureLoader().load('./assets/skybox_alt/bluecloud_rt.jpg');
-  let texture_lf = new THREE.TextureLoader().load('./assets/skybox_alt/bluecloud_lf.jpg');
-    
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_up }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_dn }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_rt }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_lf }));
-
-  for (let i = 0; i < 6; i++)
-     materialArray[i].side = THREE.BackSide;
-     
-  let skyboxGeo = new THREE.BoxGeometry(20000, 15000, 15000);
-  let skybox = new THREE.Mesh( skyboxGeo, materialArray );
-  skybox.rotation.x = Math.PI/2
-  skybox.rotation.y = Math.PI/2
-  scene.add( skybox );  
 }
 
 createSkybox();
@@ -720,7 +697,7 @@ function loadOBJFile(modelPath, modelName, visibility) {
         // obj.rotateY((-Math.PI * 2) / 3 + Math.PI / 2 - Math.PI / 6);
         obj.translateZ(1000);
         obj.translateX(-200);
-        obj.translateY(0.2);
+        obj.translateY(5);
         scene.add(obj);
         // console.log('adicionado à cena');
       }
@@ -735,6 +712,11 @@ function loadOBJFile(modelPath, modelName, visibility) {
         obj.rotateY(Math.PI / 2);
         //        obj.rotateZ(Math.PI/2);
         // console.log('adicionado');
+      }
+
+      if(modelName == 'plano') {
+        obj.rotateX(Math.PI / 2);
+        scene.add(obj)
       }
     });
   });
