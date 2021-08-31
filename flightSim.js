@@ -243,8 +243,8 @@ loadOBJFile('./assets/cenario/', 'cidade', 2, 0, true, cidade);
  * Object to controll camera
  */
 var cameraHolder = new THREE.Object3D();
-cameraHolder.position.set(3100, 3500, 0);
-cameraHolder.rotateZ(degreesToRadians(145))
+cameraHolder.position.set(1458, 10, 0);
+cameraHolder.rotateZ(degreesToRadians(-328))
 scene.add(cameraHolder);
 cameraHolder.add(camera);
 cameraHolder.add(aviao);
