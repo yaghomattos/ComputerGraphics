@@ -267,7 +267,7 @@ checkBox.box.style.bottom = '100px';
 var initialMessage = new SecondaryBox('loading 0%...');
 initialMessage.box.style.backgroundColor = 'rgba(0,0,0)';
 initialMessage.box.style.left = '27%';
-initialMessage.box.style.bottom = '30%';
+initialMessage.box.style.bottom = '35%';
 
 var keyboard = new KeyboardState();
 
@@ -336,6 +336,8 @@ function createSkybox() {
   skybox.translateX(-3000)
   skybox.rotation.y = Math.PI/2
   scene.add( skybox );  
+  skybox.castShadow = false;
+  skybox.receiveShadow = false;
 }
 
 function createSkyboxAlt() {  
@@ -566,46 +568,41 @@ controls.add('Enter to show/hide track');
 controls.show();
 controls.infoBox.style.display = 'none';
 
-/**
- * Loading screen objects
- */
-function createSlider(a, b, c) {
-  var sliderGeometry = new THREE.BoxGeometry(5, 3.5, 0.5);
-  var sliderMaterial = new THREE.MeshPhongMaterial({
-    color: 'rgb(100,250,200)',
-  });
-  var slider = new THREE.Mesh(sliderGeometry, sliderMaterial);
-  slider.position.set(a, b, c);
-  slider.rotateX(degreesToRadians(90))
-  return slider;
-}
+var loadingSegment1 = new SecondaryBox('');
+loadingSegment1.box.style.backgroundColor = 'rgba(200,200,0)';
+loadingSegment1.box.style.width = '5%'
+loadingSegment1.box.style.height = '5%'
+loadingSegment1.box.style.left = '38%';
+loadingSegment1.box.style.bottom = '46%';
+loadingSegment1.box.style.display = 'none';
+
+var loadingSegment2 = new SecondaryBox(''); 
+loadingSegment2.box.style.backgroundColor = 'rgba(200,200,0)';
+loadingSegment2.box.style.width = '5%'
+loadingSegment2.box.style.height = '5%'
+loadingSegment2.box.style.left = '44%';
+loadingSegment2.box.style.bottom = '46%';
+loadingSegment2.box.style.display = 'none';
+
+
+var loadingSegment3 = new SecondaryBox('');
+loadingSegment3.box.style.backgroundColor = 'rgba(200,200,0)';
+loadingSegment3.box.style.width = '5%'
+loadingSegment3.box.style.height = '5%'
+loadingSegment3.box.style.left = '50%';
+loadingSegment3.box.style.bottom = '46%';
+loadingSegment3.box.style.display = 'none';
+
+
+var loadingSegment4 = new SecondaryBox('');
+loadingSegment4.box.style.backgroundColor = 'rgba(200,200,0)';
+loadingSegment4.box.style.width = '5%'
+loadingSegment4.box.style.height = '5%'
+loadingSegment4.box.style.left = '56%';
+loadingSegment4.box.style.bottom = '46%';
+loadingSegment4.box.style.display = 'none';
 
 var count = 0;
-
-var borderMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,0)' });
-var borderGeometry = new THREE.BoxGeometry(20, 0.5, 0.3);
-var bottomBorder = new THREE.Mesh(borderGeometry, borderMaterial);
-bottomBorder.position.set(0.0, 0.0, 0.0);
-loadingScene.add(bottomBorder);
-bottomBorder.rotateX(degreesToRadians(90))
-bottomBorder.translateY(2)
-
-var topBorder = new THREE.Mesh(borderGeometry, borderMaterial);
-topBorder.position.set(0.0, 0.0, 0.0);
-loadingScene.add(topBorder);
-topBorder.rotateX(degreesToRadians(90))
-topBorder.translateY(-2)
-
-var borderGeometry2 = new THREE.BoxGeometry(0.5, 4.5, 0.3);
-var rightBorder = new THREE.Mesh(borderGeometry2, borderMaterial);
-rightBorder.position.set(10, 2.0, 0.0);
-loadingScene.add(rightBorder);
-rightBorder.rotateX(degreesToRadians(90))
-
-var leftBorder = new THREE.Mesh(borderGeometry2, borderMaterial);
-leftBorder.position.set(-10, 2.0, 0.0);
-loadingScene.add(leftBorder);
-leftBorder.rotateX(degreesToRadians(90))
 
 const texture = new THREE.TextureLoader().load( "./assets/background.jpg" );
 var material = new THREE.MeshBasicMaterial({ map: texture })
@@ -644,14 +641,20 @@ function loadOBJFile(modelPath, modelName, visibility) {
   };
 
   manager.onLoad = function () {
+    if (count === 1) {
+      initialMessage.changeMessage('Loading 50%...');
+      loadingSegment2.box.style.display = 'block';
+      count++;
+    }
     if (count === 2) {
       initialMessage.changeMessage('Loading 75%...');
-      loadingScene.add(createSlider(2.5, 2.0, 0.0));
+      loadingSegment3.box.style.display = 'block';
       count++;
     }
     console.log('Loading complete!');
-    if (count === 3) {
-      loadingScene.add(createSlider(7.2, 2.0, 0.0));
+    count ++;
+    if (count === 5) {
+      loadingSegment4.box.style.display = 'block';
       initialMessage.changeMessage(
         'Loading 100%... Arquivos carregados! Pressione Enter para iniciar'
       );
@@ -743,14 +746,9 @@ function loading() {
 
   initialMessage.box.style.display = 'block';
 
-  if (count < 1) {
-    loadingScene.add(createSlider(-7.2, 2.0, 0.0));
-    count++;
-  }
-
-  if (count === 1) {
-    initialMessage.changeMessage('Loading 50%...');
-    loadingScene.add(createSlider(-2.5, 2.0, 0.0));
+  if (count === 0) {
+    initialMessage.changeMessage('Loading 25%...');
+    loadingSegment1.box.style.display = 'block';
     count++;
   }
 
@@ -764,7 +762,10 @@ function flightSim() {
   initialMessage.box.style.display = 'none';
   renderer.setClearColor('rgb(135, 206, 235)');
   lightFollowTarget();
-  //dirLight.shadow.autoUpdate = true;
+  loadingSegment1.box.style.display = 'none';
+  loadingSegment2.box.style.display = 'none';
+  loadingSegment3.box.style.display = 'none';
+  loadingSegment4.box.style.display = 'none';
 }
 
 function render() {
