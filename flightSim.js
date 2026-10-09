@@ -802,6 +802,14 @@ function startFlight() {
   controls.infoBox.style.display = 'block';
   setHudVisible(true);
   scene.add(dynamicLight);
+
+  // The sun only shades static scenery, so its shadow map is drawn once, without the airplane
+  // (the airplane shadow comes from dynamicLight, which follows it).
+  dirLight.shadow.autoUpdate = false;
+  dirLight.shadow.needsUpdate = true;
+  aviao.visible = false;
+  renderer.render(scene, camera);
+  aviao.visible = true;
 }
 
 const frameClock = new THREE.Clock();
