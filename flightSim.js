@@ -12,7 +12,7 @@ import {
   createLightSphere,
 } from './lib/util.js';
 
-import { generateTrack, createCheckpoints, getRadius } from './track.js';
+import { generateTrack, createCheckpoints, CHECKPOINT_RADIUS } from './track.js';
 
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
@@ -324,7 +324,7 @@ function updateCheckpoints() {
 
   // The ring lies on its local XY plane: crossing it means local Z changed sign inside the radius.
   const side = Math.sign(airplaneLocal.z);
-  const insideRing = Math.hypot(airplaneLocal.x, airplaneLocal.y) < getRadius();
+  const insideRing = Math.hypot(airplaneLocal.x, airplaneLocal.y) < CHECKPOINT_RADIUS;
 
   if (previousSide !== null && side !== previousSide && insideRing) passCheckpoint(ring);
   else previousSide = side;
