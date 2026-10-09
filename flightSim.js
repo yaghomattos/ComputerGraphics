@@ -248,8 +248,10 @@ loadOBJFile('./assets/cenario att 3/', 'cidade', 2, 0, true, cidade);
  * Object to controll camera
  */
 var cameraHolder = new THREE.Object3D();
-cameraHolder.position.set(1458, 10, 5);
-cameraHolder.rotateZ(degreesToRadians(-328))
+const startPosition = new THREE.Vector3(1458, 10, 5);
+const startHeading = degreesToRadians(-328);
+cameraHolder.position.copy(startPosition);
+cameraHolder.rotateZ(startHeading);
 scene.add(cameraHolder);
 cameraHolder.add(camera);
 cameraHolder.add(aviao);
@@ -415,6 +417,31 @@ var started = false;
 
 var finished = false;
 
+/* Altitude limits: the airplane cannot go through the ground nor leave the skybox. */
+const MIN_ALTITUDE = startPosition.z;
+const MAX_ALTITUDE = 2000;
+
+function restartRace() {
+  cameraHolder.position.copy(startPosition);
+  cameraHolder.rotation.set(0, 0, startHeading);
+  aviao.rotation.set(0, 0, 0);
+  mult = 2;
+  movement = false;
+  updateSpeed();
+
+  checkpoints.forEach((ring) => (ring.visible = true));
+  nextCheckpoint = 0;
+  previousSide = null;
+  updateCheckpointBox();
+  highlightNextCheckpoint();
+
+  timer.stop();
+  elapsedTime = 0;
+  started = false;
+  finished = false;
+  timeBox.changeMessage(' Time: 0.00');
+}
+
 updateSpeed();
 
 function keyboardUpdate() {
@@ -470,6 +497,10 @@ function keyboardUpdate() {
 
   if (keyboard.down('C')) {
     cockpit = !cockpit;
+  }
+
+  if (keyboard.down('R')) {
+    restartRace();
   }
 
   // The airplane is paused while it is being inspected; speed is kept for when the flight resumes.
@@ -534,6 +565,8 @@ function keyboardUpdate() {
       aviao.rotation.y += degreesToRadians(0.6);
     }
   }
+
+  cameraHolder.position.z = THREE.MathUtils.clamp(cameraHolder.position.z, MIN_ALTITUDE, MAX_ALTITUDE);
 }
 
 /**
@@ -549,6 +582,8 @@ controls.add('A to speed down');
 controls.add('Up/Down arrow to elevator');
 controls.add('Left / Right arrow to turn');
 controls.add('Enter to show/hide track');
+controls.add('R to restart the race');
+controls.add('H to show/hide this help');
 controls.show();
 controls.infoBox.style.display = 'none';
 
