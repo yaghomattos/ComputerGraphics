@@ -273,8 +273,6 @@ initialMessage.box.style.bottom = '35%';
 
 var keyboard = new KeyboardState();
 
-render();
-
 /* timer */
 var timer = new THREE.Clock();
 var delta = 0;
@@ -370,8 +368,11 @@ var started = false;
 
 var latest = false;
 
-async function keyboardUpdate() {
+function keyboardUpdate() {
   keyboard.update();
+
+  // Flight and camera input only applies once the game has started.
+  if (!initialize) return;
 
   if(playMusic)  
   {
@@ -385,7 +386,7 @@ async function keyboardUpdate() {
     firstMove = false;
   } 
 
-  if (modeCam2 && initialize) {
+  if (modeCam2) {
     movement = false;
     /* invisible secondaryBox */
     speedBox.box.style.display = 'none';
@@ -459,7 +460,7 @@ async function keyboardUpdate() {
     if (!modeCam2) mult = 2;
   }
 
-  if (keyboard.down('enter') && initialize === true) {
+  if (keyboard.down('enter')) {
     track.visible = !track.visible;
   }
 
@@ -770,3 +771,5 @@ function render() {
   cameraCockpit();
   trackballControls.update();
 }
+
+render();
