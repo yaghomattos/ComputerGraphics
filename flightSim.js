@@ -211,38 +211,45 @@ cityPlane.translateX(200);
 cityPlane.translateY(-700);
 scene.add(cityPlane);
 
-// var cityPlane = new THREE.Object3D();
-// loadOBJFile('./assets/plano base/', 'plano', 2, 0, true, cityPlane);
+/**
+ * Loading resources: both models share one manager, which drives the loading bar.
+ */
+var loadingProgress = 0; /* 0..1 */
+var resourcesLoaded = false;
+
+const loadingManager = new THREE.LoadingManager();
+loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
+  // itemsTotal grows while materials discover their textures, so never move the bar backwards.
+  loadingProgress = Math.max(loadingProgress, itemsLoaded / itemsTotal);
+};
+loadingManager.onLoad = function () {
+  loadingProgress = 1;
+  resourcesLoaded = true;
+};
+loadingManager.onError = function (url) {
+  console.warn('There was an error loading ' + url);
+};
 
 /**
  * airplane
  */
 var aviao = new THREE.Object3D();
 aviao.position.set(0, -0.5, 2);
-loadOBJFile('./assets/14 bis/', '14 bis', 2, 0, true, aviao);
+loadOBJFile('./assets/14 bis/', '14 bis');
 
 /**
  * Track
  */
 var track = generateTrack();
-// track.castShadow = true;
-// track.receiveShadow = true;
 scene.add(track);
 
 var checkpoints = createCheckpoints();
-
-for (let i = 0; i < checkpoints.length; i++) {
-  var check = checkpoints[i];
-  // check.castShadow = true;
-  // check.receiveShadow = true;
-  scene.add(check);
-}
+checkpoints.forEach((ring) => scene.add(ring));
 
 /**
  * City
 */
-var cidade = new THREE.Object3D();
-loadOBJFile('./assets/cenario att 3/', 'cidade', 2, 0, true, cidade);
+loadOBJFile('./assets/cenario att 3/', 'cidade');
 
 /**
  * Object to controll camera
@@ -286,6 +293,16 @@ function updateTime() {
   elapsedTime += timer.getDelta();
   timeBox.changeMessage(' Time: ' + elapsedTime.toFixed(2));
 }
+
+function setHudVisible(visible) {
+  const display = visible ? 'block' : 'none';
+  speedBox.box.style.display = display;
+  timeBox.box.style.display = display;
+  checkBox.box.style.display = display;
+  maxSpeedBox.box.style.display = visible && isMaxSpeed() ? 'block' : 'none';
+}
+
+setHudVisible(false); // shown when the flight starts
 
 /* message speed */
 maxSpeedBox.changeMessage('MAX');
@@ -361,24 +378,15 @@ highlightNextCheckpoint();
  * Skybox
  */
 function createSkybox() {  
-  let materialArray = [];
-  let texture_ft = new THREE.TextureLoader().load('./assets/skybox/arid2_ft.jpg');
-  let texture_bk = new THREE.TextureLoader().load('./assets/skybox/arid2_bk.jpg');
-  let texture_up = new THREE.TextureLoader().load('./assets/skybox/arid2_up.jpg');
-  let texture_dn = new THREE.TextureLoader().load('./assets/skybox/arid2_dn.jpg');
-  let texture_rt = new THREE.TextureLoader().load('./assets/skybox/arid2_rt.jpg');
-  let texture_lf = new THREE.TextureLoader().load('./assets/skybox/arid2_lf.jpg');
-    
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_up }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_dn }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_rt }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_lf }));
+  const textureLoader = new THREE.TextureLoader();
+  const materialArray = ['ft', 'bk', 'up', 'dn', 'rt', 'lf'].map(
+    (face) =>
+      new THREE.MeshBasicMaterial({
+        map: textureLoader.load('./assets/skybox/arid2_' + face + '.jpg'),
+        side: THREE.BackSide,
+      })
+  );
 
-  for (let i = 0; i < 6; i++)
-     materialArray[i].side = THREE.BackSide;
-     
   let skyboxGeo = new THREE.BoxGeometry(40500, 40500, 40500);
   let skybox = new THREE.Mesh( skyboxGeo, materialArray );
   skybox.rotation.x = Math.PI/2
@@ -462,20 +470,9 @@ function keyboardUpdate() {
     firstMove = false;
   } 
 
-  if (modeCam2) {
-    /* invisible secondaryBox */
-    speedBox.box.style.display = 'none';
-    timeBox.box.style.display = 'none';
-    maxSpeedBox.box.style.display = 'none';
-    checkBox.box.style.display = 'none';
-    controls.infoBox.style.display = 'none';
-  } else {
-    /* visible secondaryBox */
-    speedBox.box.style.display = 'block';
-    timeBox.box.style.display = 'block';
-    maxSpeedBox.box.style.display = isMaxSpeed() ? 'block' : 'none';
-    checkBox.box.style.display = 'block';
-  }
+  /* the HUD is hidden while inspecting the airplane */
+  setHudVisible(!modeCam2);
+  if (modeCam2) controls.infoBox.style.display = 'none';
 
   updateCheckpoints();
   if (started && !finished) updateTime();
@@ -507,7 +504,6 @@ function keyboardUpdate() {
   if (modeCam2) return;
 
   if (movement) {
-    aviao.translateY(0);
     cameraHolder.translateY(speed * mult);
   }
 
@@ -587,41 +583,20 @@ controls.add('H to show/hide this help');
 controls.show();
 controls.infoBox.style.display = 'none';
 
-var loadingSegment1 = new SecondaryBox('');
-loadingSegment1.box.style.backgroundColor = 'rgba(200,200,0)';
-loadingSegment1.box.style.width = '5%'
-loadingSegment1.box.style.height = '5%'
-loadingSegment1.box.style.left = '38%';
-loadingSegment1.box.style.bottom = '46%';
-loadingSegment1.box.style.display = 'none';
-
-var loadingSegment2 = new SecondaryBox(''); 
-loadingSegment2.box.style.backgroundColor = 'rgba(200,200,0)';
-loadingSegment2.box.style.width = '5%'
-loadingSegment2.box.style.height = '5%'
-loadingSegment2.box.style.left = '44%';
-loadingSegment2.box.style.bottom = '46%';
-loadingSegment2.box.style.display = 'none';
-
-
-var loadingSegment3 = new SecondaryBox('');
-loadingSegment3.box.style.backgroundColor = 'rgba(200,200,0)';
-loadingSegment3.box.style.width = '5%'
-loadingSegment3.box.style.height = '5%'
-loadingSegment3.box.style.left = '50%';
-loadingSegment3.box.style.bottom = '46%';
-loadingSegment3.box.style.display = 'none';
-
-
-var loadingSegment4 = new SecondaryBox('');
-loadingSegment4.box.style.backgroundColor = 'rgba(200,200,0)';
-loadingSegment4.box.style.width = '5%'
-loadingSegment4.box.style.height = '5%'
-loadingSegment4.box.style.left = '56%';
-loadingSegment4.box.style.bottom = '46%';
-loadingSegment4.box.style.display = 'none';
-
-var count = 0;
+const LOADING_SEGMENTS = 4;
+const loadingSegments = [];
+for (let i = 0; i < LOADING_SEGMENTS; i++) {
+  const segment = new SecondaryBox('');
+  Object.assign(segment.box.style, {
+    backgroundColor: 'rgba(200,200,0)',
+    width: '5%',
+    height: '5%',
+    left: 38 + i * 6 + '%',
+    bottom: '46%',
+    display: 'none',
+  });
+  loadingSegments.push(segment);
+}
 
 const texture = new THREE.TextureLoader().load( "./assets/background.jpg" );
 var material = new THREE.MeshBasicMaterial({ map: texture })
@@ -631,7 +606,6 @@ loadingScene.add(background)
 background.rotateX(degreesToRadians(90))
 
 var initialize = false;
-var resourcesLoaded = false;
 
 function checkInit() {
   if (resourcesLoaded && keyboard.down('enter')) {
@@ -641,124 +615,38 @@ function checkInit() {
 }
 
 /**
- * Loading resources
+ * Loads an OBJ model with its MTL materials and places it in the scene.
  */
-function loadOBJFile(modelPath, modelName, visibility) {
-  // console.log('começando');
-  var manager = new THREE.LoadingManager();
-
-  manager.onStart = function (url, itemsLoaded, itemsTotal) {
-    console.log(
-      'Started loading file: ' +
-        url +
-        '.\nLoaded ' +
-        itemsLoaded +
-        ' of ' +
-        itemsTotal +
-        ' files.'
-    );
-  };
-
-  manager.onLoad = function () {
-    if (count === 1) {
-      initialMessage.changeMessage('Loading 50%...');
-      loadingSegment2.box.style.display = 'block';
-      count++;
-    }
-    if (count === 2) {
-      initialMessage.changeMessage('Loading 75%...');
-      loadingSegment3.box.style.display = 'block';
-      count++;
-    }
-    console.log('Loading complete!');
-    count ++;
-    if (count === 5) {
-      loadingSegment4.box.style.display = 'block';
-      initialMessage.changeMessage(
-        'Loading 100%... Arquivos carregados! Pressione Enter para iniciar'
-      );
-      resourcesLoaded = true;
-    }
-  };
-
-  manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-    console.log(
-      'Loading file: ' +
-        url +
-        '.\nLoaded ' +
-        itemsLoaded +
-        ' of ' +
-        itemsTotal +
-        ' files.'
-    );
-  };
-
-  manager.onError = function (url) {
-    console.log('There was an error loading ' + url);
-  };
-
-  var mtlLoader = new MTLLoader(manager);
+function loadOBJFile(modelPath, modelName) {
+  var mtlLoader = new MTLLoader(loadingManager);
   mtlLoader.setPath(modelPath);
   mtlLoader.load(modelName + '.mtl', function (materials) {
     materials.preload();
-    // console.log('materiais carregados');
 
-    var objLoader = new OBJLoader(manager);
+    var objLoader = new OBJLoader(loadingManager);
     objLoader.setMaterials(materials);
     objLoader.setPath(modelPath);
     objLoader.load(modelName + '.obj', function (obj) {
-      // console.log('objeto carregado, sendo processado');
-      obj.visible = visibility;
       obj.name = modelName;
-      // Set 'castShadow' property for each children of the group
       obj.traverse(function (child) {
-        // console.log('carregando...');
         child.castShadow = true;
         child.receiveShadow = true;
+        if (child.material) child.material.side = THREE.DoubleSide;
       });
-
-      obj.traverse(function (node) {
-        // console.log('carregando(2)...');
-        if (node.material) node.material.side = THREE.DoubleSide;
-      });
-      // console.log('finalizado');
-
-      /*
-        var obj = normalizeAndRescale(obj, desiredScale);
-        console.log("1")
-        var obj = fixPosition(obj);
-        console.log("2")
-        obj.rotateY(degreesToRadians(angle));
-        */
-      // console.log('obj: ');
-      // console.log(obj);
 
       if (modelName == 'cidade') {
-        // console.log('começando a adicionar');
         obj.rotateX(degreesToRadians(90));
-        // obj.rotateY((-Math.PI * 2) / 3 + Math.PI / 2 - Math.PI / 6);
         obj.translateZ(1000);
         obj.translateX(-200);
         obj.translateY(5);
         scene.add(obj);
-        // console.log('adicionado à cena');
       }
 
-
       if (modelName == '14 bis') {
-        // console.log('adicionando ao objeto');
         aviao.add(obj);
-        // console.log('adicionando ao modelo de inspeção');
         aviaoInspec.copy(aviao, true);
         obj.rotateX(Math.PI / 2);
         obj.rotateY(Math.PI / 2);
-        //        obj.rotateZ(Math.PI/2);
-        // console.log('adicionado');
-      }
-
-      if(modelName == 'plano') {
-        obj.rotateX(Math.PI / 2);
-        scene.add(obj)
       }
     });
   });
@@ -766,30 +654,25 @@ function loadOBJFile(modelPath, modelName, visibility) {
 
 function loading() {
   renderer.render(loadingScene, cameraLoading);
-  renderer.setClearColor('rgb(80, 80, 80)');
 
-  initialMessage.box.style.display = 'block';
-
-  if (count === 0) {
-    initialMessage.changeMessage('Loading 25%...');
-    loadingSegment1.box.style.display = 'block';
-    count++;
-  }
-
-  speedBox.box.style.display = 'none';
-  timeBox.box.style.display = 'none';
-  maxSpeedBox.box.style.display = 'none';
-  checkBox.box.style.display = 'none';
+  initialMessage.changeMessage(
+    resourcesLoaded
+      ? 'Loading 100%... Arquivos carregados! Pressione Enter para iniciar'
+      : 'Loading ' + Math.floor(loadingProgress * 100) + '%...'
+  );
+  loadingSegments.forEach((segment, i) => {
+    segment.box.style.display = loadingProgress >= (i + 1) / LOADING_SEGMENTS ? 'block' : 'none';
+  });
 }
 
-function flightSim() {
+/* Switches from the loading screen to the flight, once. */
+function startFlight() {
   initialMessage.box.style.display = 'none';
+  loadingSegments.forEach((segment) => (segment.box.style.display = 'none'));
   renderer.setClearColor('rgb(135, 206, 235)');
-  lightFollowTarget();
-  loadingSegment1.box.style.display = 'none';
-  loadingSegment2.box.style.display = 'none';
-  loadingSegment3.box.style.display = 'none';
-  loadingSegment4.box.style.display = 'none';
+  controls.infoBox.style.display = 'block';
+  setHudVisible(true);
+  scene.add(dynamicLight);
 }
 
 function render() {
@@ -801,12 +684,10 @@ function render() {
     checkInit();
   } else {
     if (firstRendering) {
-      controls.infoBox.style.display = 'block';
-      //dirLight.shadow.autoUpdate = false;
-      scene.add(dynamicLight);
+      startFlight();
       firstRendering = false;
     }
-    flightSim();
+    lightFollowTarget();
     if (sim) renderer.render(scene, camera);
     else renderer.render(inspecScene, inspecCamera);
   }
