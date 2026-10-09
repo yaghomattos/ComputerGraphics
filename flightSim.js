@@ -1,7 +1,7 @@
-import * as THREE from '../build/three.module.js';
-import Stats from '../build/jsm/libs/stats.module.js';
-import KeyboardState from '../libs/util/KeyboardState.js';
-import { TrackballControls } from '../build/jsm/controls/TrackballControls.js';
+import * as THREE from 'three';
+import Stats from 'three/examples/jsm/libs/stats.module.js';
+import KeyboardState from './lib/KeyboardState.js';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import {
   initRenderer,
   InfoBox,
@@ -10,12 +10,12 @@ import {
   onWindowResize,
   degreesToRadians,
   createLightSphere,
-} from '../libs/util/util.js';
+} from './lib/util.js';
 
 import { generateTrack, createCheckpoints, getRadius } from './track.js';
 
-import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
-import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 
 var stats = new Stats(); // To show FPS information
 var renderer = initRenderer(); // View function in util/utils

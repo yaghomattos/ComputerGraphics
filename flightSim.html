@@ -1,16 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>Flight Simulator</title>
-    <link rel="shortcut icon" href="../favicon.ico">
-    <link rel="stylesheet" href="../html/resources/default.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flight Simulator</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #505050; }
+    #webgl-output canvas { display: block; }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.module.js",
+        "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.132.2/examples/jsm/"
+      }
+    }
+  </script>
 </head>
 
 <body>
-  <div id="webgl-output">
-    <script type="module" src="flightSim.js"></script>
-  </div>
+  <div id="webgl-output"></div>
+  <script type="module" src="flightSim.js"></script>
 </body>
 
 </html>

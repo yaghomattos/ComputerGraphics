@@ -1,4 +1,4 @@
-import * as THREE from '../build/three.module.js';
+import * as THREE from 'three';
 
 var curveTrackPoints = [
     new THREE.Vector3(1500, 0, 50),   
