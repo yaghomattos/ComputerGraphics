@@ -6,9 +6,11 @@ Simulador de voo 3D feito com [Three.js](https://threejs.org/) como trabalho de 
 
 - Modelo do 14-bis e cenário urbano em OBJ/MTL, com skybox e sombras dinâmicas
 - Pista em curva Catmull-Rom com 14 checkpoints, que devem ser cruzados em ordem; o próximo anel fica em destaque
-- Cronômetro, velocidade e contador de checkpoints no HUD
+- Modelo de voo em que o avião vira inclinando as asas: quanto mais devagar, mais fechada a curva
+- Prédios da cidade com colisão; ao bater, o avião reaparece no último anel cruzado
+- Cronômetro, velocidade, acelerador e contador de checkpoints no HUD
 - Câmera de perseguição, câmera de cockpit e modo de inspeção do avião (com trackball)
-- Música e efeitos sonoros
+- Música e efeitos sonoros, com o som do motor acompanhando o acelerador
 
 ## Como executar
 
@@ -26,9 +28,9 @@ Depois, acesse <http://localhost:8000/flightSim.html>, aguarde o carregamento e 
 
 | Tecla | Ação |
 | --- | --- |
-| `Q` / `A` | Acelerar / desacelerar |
-| `↑` / `↓` | Descer / subir (manche) |
-| `←` / `→` | Virar à esquerda / direita |
+| `Q` / `A` | Abrir / fechar o acelerador |
+| `↓` / `↑` | Levantar / baixar o nariz (manche: puxar sobe) |
+| `←` / `→` | Inclinar as asas e virar à esquerda / direita |
 | `C` | Alternar câmera de cockpit |
 | `Espaço` | Alternar modo de inspeção do avião |
 | `Enter` | Mostrar / ocultar a pista |
@@ -39,19 +41,33 @@ O cronômetro começa ao cruzar o primeiro anel e para no último.
 
 ### Decolagem e voo
 
-- O avião começa parado no solo. Acelere com `Q` e taxie até **20 km/h** para poder subir com `↓`.
-- No solo o avião só faz curvas em movimento, sem inclinar as asas.
-- Abaixo de 20 km/h não há sustentação: em voo, o avião perde altitude até pousar.
-- Perto do chão, a inclinação nas curvas e o mergulho são limitados para que asas e nariz não toquem o solo.
+- O avião começa parado no solo. Abra o acelerador com `Q`, taxie até **24 km/h** e puxe o manche (`↓`) para decolar.
+- No solo o avião vira como um carro, sem inclinar as asas; com o acelerador fechado ele freia até parar.
+- No ar, `←` / `→` inclinam as asas e a inclinação faz a curva. Em velocidades baixas (30–40 km/h) as curvas são bem fechadas, o ideal para passar pelos anéis; em alta velocidade é preciso reduzir antes das curvas.
+- A subida depende do nariz e da velocidade. Abaixo de 24 km/h não há sustentação: o nariz cai e o avião perde altitude.
+- Bater em um prédio, ou tocar o chão rápido demais, é um acidente: depois de 1,5 s o avião reaparece no último anel cruzado, apontando para a pista. O cronômetro continua correndo.
+- Perto do chão, a inclinação e o mergulho são limitados para que asas e nariz não toquem o solo.
+- A física roda em passos fixos, então o comportamento é o mesmo com qualquer taxa de quadros.
 
 ## Estrutura
 
 ```
 flightSim.html    página de entrada (import map do Three.js)
-flightSim.js      cena, câmeras, controles, HUD e lógica da corrida
+flightSim.js      cena, câmeras, HUD, corrida e integração com a física
+flight.js         modelo de voo (sem dependência do Three.js)
+terrain.js        mapa de alturas da cidade, usado nas colisões
 track.js          pista e checkpoints
 lib/              utilitários (renderer, HUD, teclado)
+test/             testes do modelo de voo e do terreno
 assets/           modelos, texturas, skybox e sons
+```
+
+## Testes
+
+O modelo de voo e o mapa de alturas têm testes automatizados, executados com o Node.js (18 ou superior):
+
+```bash
+npm test
 ```
 
 ## Autores
