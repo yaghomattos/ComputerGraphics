@@ -13,6 +13,7 @@ import {
 } from './lib/util.js';
 
 import { generateTrack, createCheckpoints, CHECKPOINT_RADIUS } from './track.js';
+import { FLIGHT, createFlightState, stepFlight } from './flight.js';
 
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
@@ -271,10 +272,6 @@ cameraHolder.add(aviao);
 */
 var speedBox = new SecondaryBox('');
 
-var maxSpeedBox = new SecondaryBox('');
-maxSpeedBox.box.style.left = '225px';
-maxSpeedBox.box.style.display = 'none';
-
 var timeBox = new SecondaryBox(' Time: 0.00');
 timeBox.box.style.bottom = '50px';
 
@@ -302,26 +299,21 @@ function setHudVisible(visible) {
   speedBox.box.style.display = display;
   timeBox.box.style.display = display;
   checkBox.box.style.display = display;
-  maxSpeedBox.box.style.display = visible && isMaxSpeed() ? 'block' : 'none';
 }
 
 setHudVisible(false); // shown when the flight starts
 
 /* message speed */
-maxSpeedBox.changeMessage('MAX');
-
-/* speed shown in the HUD, in km/h */
-function currentSpeed() {
-  return movement ? Math.pow(mult, 2) : 0;
-}
-
-function isMaxSpeed() {
-  return currentSpeed() > 41;
-}
+/* The scene is not to scale, so the HUD shows speeds in a "game" km/h. */
+const SPEED_TO_KMH = 0.3;
+const toKmh = (speed) => Math.round(speed * SPEED_TO_KMH);
 
 function updateSpeed() {
-  let message = 'Speed: ' + currentSpeed().toFixed(0) + ' km/h';
-  if (isOnGround() && !hasLift()) message += ' (takeoff at ' + TAKEOFF_SPEED + ' km/h)';
+  const throttle = flight.throttle === 1 ? 'MAX' : Math.round(flight.throttle * 100) + '%';
+  let message = 'Speed: ' + toKmh(flight.speed) + ' km/h · Throttle: ' + throttle;
+  if (flight.onGround && flight.speed < FLIGHT.STALL_SPEED) {
+    message += ' (takeoff at ' + toKmh(FLIGHT.STALL_SPEED) + ' km/h)';
+  }
   speedBox.changeMessage(message);
 }
 
@@ -421,36 +413,46 @@ function cameraCockpit() {
   } else camera.position.set(0, -30, 10);
 }
 
-/* Variables to control */
-const speed = 1.0; /* sets the initial speed */
-var mult = 2; /* sets initial speed multiplication */
-const ACCELERATION = 0.03; /* change of mult per frame while Q/A is held */
-var movement = false; /* movement check */
-var angularSpeedVertical = 0.317;
-var angularSpeedHorizontal = 0.00238;
+/**
+ * Flight: the physics lives in flight.js; here the keys are read and the result is shown.
+ */
+var flight = createFlightState({
+  x: startPosition.x,
+  y: startPosition.y,
+  z: startPosition.z,
+  heading: startHeading,
+});
 
-/*  */
-var animation = degreesToRadians(0.1587);
+function flightInput() {
+  const axis = (positive, negative) => (keyboard.pressed(positive) ? 1 : 0) - (keyboard.pressed(negative) ? 1 : 0);
+  return {
+    throttle: axis('Q', 'A'),
+    pitch: axis('down', 'up'), // stick convention: pulling back (down arrow) raises the nose
+    roll: axis('right', 'left'),
+  };
+}
+
+/* Height of the ground (or of whatever is below) at a point of the scene. */
+function groundHeightAt(x, y) {
+  return GROUND_SURFACE;
+}
+
+function updateFlight(dt) {
+  stepFlight(flight, flightInput(), dt, groundHeightAt);
+  keepClearOfGround();
+
+  cameraHolder.position.set(flight.x, flight.y, flight.z);
+  cameraHolder.rotation.set(0, 0, flight.heading);
+  aviao.rotation.set(flight.pitch, flight.bank, 0);
+
+  if (flight.throttle > 0) playPlaneSound = true;
+  updateSpeed();
+}
+
 var modeCam2 = false;
 var started = false;
 
 var finished = false;
-
-/* Altitude limits: the airplane cannot go through the ground nor leave the skybox. */
-const MIN_ALTITUDE = startPosition.z; /* cameraHolder height with the wheels on the ground */
-const MAX_ALTITUDE = 2000;
-
-/* Lift: below the takeoff speed the airplane cannot climb and, if airborne, it sinks (stall). */
-const TAKEOFF_SPEED = 20; /* km/h, same unit as the HUD */
-const STALL_SINK_RATE = 0.3; /* altitude lost per frame without lift */
-
-function isOnGround() {
-  return cameraHolder.position.z <= MIN_ALTITUDE + 0.01;
-}
-
-function hasLift() {
-  return currentSpeed() >= TAKEOFF_SPEED;
-}
 
 /**
  * Ground clearance: pitch and bank are limited so no part of the airplane goes below the ground
@@ -496,13 +498,13 @@ function groundClearance(pitch, bank) {
     lowest = Math.min(lowest, hullPoint.copy(point).applyQuaternion(attitudeQuaternion).z);
   }
   // cameraHolder only rotates around Z, so local heights are world heights.
-  return cameraHolder.position.z + aviao.position.z + lowest - GROUND_SURFACE;
+  return flight.z + aviao.position.z + lowest - groundHeightAt(flight.x, flight.y);
 }
 
 /* Levels the wings and the nose just enough to keep the airplane clear of the ground. */
 function keepClearOfGround() {
-  const pitch = aviao.rotation.x;
-  const bank = aviao.rotation.y;
+  const pitch = flight.pitch;
+  const bank = flight.bank;
   if (groundClearance(pitch, bank) >= 0) return;
 
   // Binary search for the largest fraction of the current attitude that still clears the ground.
@@ -513,17 +515,18 @@ function keepClearOfGround() {
     if (groundClearance(pitch * fraction, bank * fraction) >= 0) safe = fraction;
     else unsafe = fraction;
   }
-  aviao.rotation.x = pitch * safe;
-  aviao.rotation.y = bank * safe;
+  flight.pitch = pitch * safe;
+  flight.bank = bank * safe;
 }
 
 function restartRace() {
-  cameraHolder.position.copy(startPosition);
-  cameraHolder.rotation.set(0, 0, startHeading);
-  aviao.rotation.set(0, 0, 0);
-  mult = 2;
-  movement = false;
-  updateSpeed();
+  flight = createFlightState({
+    x: startPosition.x,
+    y: startPosition.y,
+    z: startPosition.z,
+    heading: startHeading,
+  });
+  updateFlight(0);
 
   checkpoints.forEach((ring) => (ring.visible = true));
   nextCheckpoint = 0;
@@ -540,7 +543,7 @@ function restartRace() {
 
 updateSpeed();
 
-function keyboardUpdate() {
+function keyboardUpdate(dt) {
   keyboard.update();
 
   // Flight and camera input only applies once the game has started.
@@ -591,77 +594,7 @@ function keyboardUpdate() {
   // The airplane is paused while it is being inspected; speed is kept for when the flight resumes.
   if (modeCam2) return;
 
-  if (movement) {
-    cameraHolder.translateY(speed * mult);
-  }
-
-  if (keyboard.pressed('Q') && mult < 6.4) {
-    mult = Math.min(6.4, mult + ACCELERATION);
-    movement = true;
-    playPlaneSound = true;
-  }
-  if (keyboard.pressed('A') && mult > 2) {
-    mult = Math.max(2, mult - ACCELERATION);
-  }
-
-  const onGround = isOnGround();
-  const lift = hasLift();
-
-  if (!onGround && !lift) {
-    cameraHolder.translateZ(-STALL_SINK_RATE);
-  }
-
-  // Descending only makes sense in the air; climbing needs lift (taxi until the takeoff speed).
-  if (keyboard.pressed('up') && !onGround && aviao.rotation.x <= degreesToRadians(1)) {
-    cameraHolder.translateZ(-angularSpeedVertical * mult);
-    if (aviao.rotation.x >= degreesToRadians(-15)) {
-      aviao.rotation.x -= animation * mult;
-    }
-  } else if (
-    keyboard.pressed('down') &&
-    lift &&
-    aviao.rotation.x >= degreesToRadians(-1)
-  ) {
-    cameraHolder.translateZ(angularSpeedVertical * mult);
-    if (aviao.rotation.x <= degreesToRadians(15)) {
-      aviao.rotation.x += animation * mult;
-    }
-  } else {
-    if (aviao.rotation.x > 0 && aviao.rotation.x <= degreesToRadians(22)) {
-      aviao.rotation.x -= degreesToRadians(0.5);
-    }
-    if (aviao.rotation.x < 0 && aviao.rotation.x >= degreesToRadians(-22)) {
-      aviao.rotation.x += degreesToRadians(0.5);
-    }
-  }
-
-  // A stopped airplane cannot turn; on the ground it steers without banking (taxi).
-  if (keyboard.pressed('left') && movement && aviao.rotation.y <= degreesToRadians(1)) {
-    cameraHolder.rotateZ(angularSpeedHorizontal * mult);
-    if (!onGround && aviao.rotation.y >= degreesToRadians(-25)) {
-      aviao.rotation.y -= animation * mult;
-    }
-  } else if (
-    keyboard.pressed('right') &&
-    movement &&
-    aviao.rotation.y >= degreesToRadians(-1)
-  ) {
-    cameraHolder.rotateZ(-angularSpeedHorizontal * mult);
-    if (!onGround && aviao.rotation.y <= degreesToRadians(25)) {
-      aviao.rotation.y += animation * mult;
-    }
-  } else {
-    if (aviao.rotation.y > 0 && aviao.rotation.y <= degreesToRadians(40)) {
-      aviao.rotation.y -= degreesToRadians(0.6);
-    }
-    if (aviao.rotation.y < 0 && aviao.rotation.y >= degreesToRadians(-40)) {
-      aviao.rotation.y += degreesToRadians(0.6);
-    }
-  }
-
-  cameraHolder.position.z = THREE.MathUtils.clamp(cameraHolder.position.z, MIN_ALTITUDE, MAX_ALTITUDE);
-  keepClearOfGround();
-  updateSpeed();
+  updateFlight(dt);
 }
 
 /**
@@ -672,10 +605,9 @@ controls.add('Controls');
 controls.addParagraph();
 controls.add('Space to change camera mode');
 controls.add('C for cockpit camera');
-controls.add('Q to speed up');
-controls.add('A to speed down');
-controls.add('Up/Down arrow to elevator');
-controls.add('Left / Right arrow to turn');
+controls.add('Q / A: throttle up / down');
+controls.add('Down / Up arrow: nose up / down');
+controls.add('Left / Right arrow: bank and turn');
 controls.add('Enter to show/hide track');
 controls.add('R to restart the race');
 controls.add('H to show/hide this help');
@@ -775,9 +707,11 @@ function startFlight() {
   scene.add(dynamicLight);
 }
 
+const frameClock = new THREE.Clock();
+
 function render() {
   stats.update(); // Update FPS
-  keyboardUpdate();
+  keyboardUpdate(frameClock.getDelta());
   requestAnimationFrame(render); // Show events
   if (initialize != true) {
     loading();
