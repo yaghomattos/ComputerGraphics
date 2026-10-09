@@ -14,6 +14,7 @@ import {
 
 import { generateTrack, createCheckpoints, CHECKPOINT_RADIUS } from './track.js';
 import { FLIGHT, createFlightState, stepFlight } from './flight.js';
+import { createHeightMap } from './terrain.js';
 
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
@@ -208,12 +209,39 @@ groundPlane.receiveShadow = false;
 scene.add(groundPlane);
 
 const GROUND_SURFACE = 5; /* height of the city ground, where the airplane rolls */
+const CITY_CENTER = { x: 200, y: -700 };
+const CITY_SIZE = 4500;
 
-var cityPlane = createGroundPlane(4500, 4500, 1, 1, 'rgb(200,100,100)')
+var cityPlane = createGroundPlane(CITY_SIZE, CITY_SIZE, 1, 1, 'rgb(200,100,100)')
 cityPlane.translateZ(GROUND_SURFACE);
-cityPlane.translateX(200);
-cityPlane.translateY(-700);
+cityPlane.translateX(CITY_CENTER.x);
+cityPlane.translateY(CITY_CENTER.y);
 scene.add(cityPlane);
+
+/* Height map of the city model (streets and buildings), built when it loads. */
+var cityHeights = null;
+
+function isInsideCity(x, y) {
+  return Math.abs(x - CITY_CENTER.x) <= CITY_SIZE / 2 && Math.abs(y - CITY_CENTER.y) <= CITY_SIZE / 2;
+}
+
+/* World-space triangles of every mesh of a model, as a flat [x, y, z, ...] array. */
+function collectTriangles(model) {
+  model.updateMatrixWorld(true);
+  const positions = [];
+  const vertex = new THREE.Vector3();
+  model.traverse(function (child) {
+    if (!child.isMesh) return;
+    const position = child.geometry.attributes.position;
+    const index = child.geometry.index;
+    const count = index ? index.count : position.count;
+    for (let k = 0; k < count; k++) {
+      vertex.fromBufferAttribute(position, index ? index.getX(k) : k).applyMatrix4(child.matrixWorld);
+      positions.push(vertex.x, vertex.y, vertex.z);
+    }
+  });
+  return positions;
+}
 
 /**
  * Loading resources: both models share one manager, which drives the loading bar.
@@ -432,13 +460,66 @@ function flightInput() {
   };
 }
 
-/* Height of the ground (or of whatever is below) at a point of the scene. */
+/* Height of the ground (or of whatever is below, like a building) at a point of the scene. */
 function groundHeightAt(x, y) {
-  return GROUND_SURFACE;
+  const ground = isInsideCity(x, y) ? GROUND_SURFACE : 0;
+  return cityHeights ? Math.max(ground, cityHeights.heightAt(x, y)) : ground;
+}
+
+/**
+ * Crash: after a short pause the airplane reappears at the last ring crossed, flying towards the
+ * next one. The race timer keeps running, so crashing costs time.
+ */
+const CRASH_RESPAWN_DELAY = 1.5; /* s */
+const RESPAWN_SPEED = 120; /* u/s */
+var crashTimer = 0; /* s left before respawning, 0 when flying */
+
+var crashBox = new SecondaryBox('CRASH!');
+Object.assign(crashBox.box.style, {
+  left: '50%',
+  bottom: '55%',
+  transform: 'translateX(-50%)',
+  fontSize: '40px',
+  backgroundColor: 'rgba(180,0,0,0.7)',
+  display: 'none',
+});
+
+function crash() {
+  crashTimer = CRASH_RESPAWN_DELAY;
+  crashBox.box.style.display = 'block';
+}
+
+function respawn() {
+  crashTimer = 0;
+  crashBox.box.style.display = 'none';
+  previousSide = null;
+
+  if (nextCheckpoint === 0) {
+    flight = createFlightState({ x: startPosition.x, y: startPosition.y, z: startPosition.z, heading: startHeading });
+    return;
+  }
+  // The ring axis (local Z) follows the track, which goes around the buildings.
+  const ring = checkpoints[nextCheckpoint - 1];
+  const along = new THREE.Vector3(0, 0, 1).applyQuaternion(ring.quaternion);
+  flight = createFlightState({
+    x: ring.position.x,
+    y: ring.position.y,
+    z: ring.position.z,
+    heading: Math.atan2(-along.x, along.y),
+    speed: RESPAWN_SPEED,
+    throttle: RESPAWN_SPEED / FLIGHT.MAX_SPEED,
+    onGround: false,
+  });
 }
 
 function updateFlight(dt) {
-  stepFlight(flight, flightInput(), dt, groundHeightAt);
+  if (crashTimer > 0) {
+    crashTimer -= Math.min(dt, FLIGHT.MAX_FRAME_DT);
+    if (crashTimer > 0) return;
+    respawn();
+  } else if (stepFlight(flight, flightInput(), dt, groundHeightAt).crashed) {
+    crash();
+  }
   keepClearOfGround();
 
   cameraHolder.position.set(flight.x, flight.y, flight.z);
@@ -520,6 +601,8 @@ function keepClearOfGround() {
 }
 
 function restartRace() {
+  crashTimer = 0;
+  crashBox.box.style.display = 'none';
   flight = createFlightState({
     x: startPosition.x,
     y: startPosition.y,
@@ -671,6 +754,7 @@ function loadOBJFile(modelPath, modelName) {
         obj.translateX(-200);
         obj.translateY(5);
         scene.add(obj);
+        cityHeights = createHeightMap(collectTriangles(obj));
       }
 
       if (modelName == '14 bis') {
