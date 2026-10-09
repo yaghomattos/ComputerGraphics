@@ -137,7 +137,7 @@ var audioLoader = new THREE.AudioLoader();
 audioLoader.load( './assets/FlightSimulatorTheme.mp3', function( buffer ) {
 	sound.setBuffer(buffer);
 	sound.setLoop( true );
-	sound.setVolume( 0.5 );
+	sound.setVolume( 0.2 ); // background music, kept low under the engine
 });
 
 audioLoader.load( './assets/planeSound.mp3', function ( buffer ) {
