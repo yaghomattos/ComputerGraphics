@@ -307,12 +307,19 @@ setHudVisible(false); // shown when the flight starts
 /* message speed */
 maxSpeedBox.changeMessage('MAX');
 
+/* speed shown in the HUD, in km/h */
+function currentSpeed() {
+  return movement ? Math.pow(mult, 2) : 0;
+}
+
 function isMaxSpeed() {
-  return Math.pow(mult, 2) > 41;
+  return currentSpeed() > 41;
 }
 
 function updateSpeed() {
-  speedBox.changeMessage('Speed: ' + Math.pow(mult, 2).toFixed(0) + ' km/h');
+  let message = 'Speed: ' + currentSpeed().toFixed(0) + ' km/h';
+  if (isOnGround() && !hasLift()) message += ' (takeoff at ' + TAKEOFF_SPEED + ' km/h)';
+  speedBox.changeMessage(message);
 }
 
 /**
@@ -414,6 +421,7 @@ function cameraCockpit() {
 /* Variables to control */
 const speed = 1.0; /* sets the initial speed */
 var mult = 2; /* sets initial speed multiplication */
+const ACCELERATION = 0.03; /* change of mult per frame while Q/A is held */
 var movement = false; /* movement check */
 var angularSpeedVertical = 0.317;
 var angularSpeedHorizontal = 0.00238;
@@ -426,8 +434,20 @@ var started = false;
 var finished = false;
 
 /* Altitude limits: the airplane cannot go through the ground nor leave the skybox. */
-const MIN_ALTITUDE = startPosition.z;
+const MIN_ALTITUDE = startPosition.z; /* cameraHolder height with the wheels on the ground */
 const MAX_ALTITUDE = 2000;
+
+/* Lift: below the takeoff speed the airplane cannot climb and, if airborne, it sinks (stall). */
+const TAKEOFF_SPEED = 20; /* km/h, same unit as the HUD */
+const STALL_SINK_RATE = 0.3; /* altitude lost per frame without lift */
+
+function isOnGround() {
+  return cameraHolder.position.z <= MIN_ALTITUDE + 0.01;
+}
+
+function hasLift() {
+  return currentSpeed() >= TAKEOFF_SPEED;
+}
 
 function restartRace() {
   cameraHolder.position.copy(startPosition);
@@ -508,23 +528,30 @@ function keyboardUpdate() {
   }
 
   if (keyboard.pressed('Q') && mult < 6.4) {
-    mult += 0.1;
-    updateSpeed();   
+    mult = Math.min(6.4, mult + ACCELERATION);
     movement = true;
     playPlaneSound = true;
   }
-  if (keyboard.pressed('A') && mult > 2.1) {
-    mult -= 0.1;
-    updateSpeed();
+  if (keyboard.pressed('A') && mult > 2) {
+    mult = Math.max(2, mult - ACCELERATION);
   }
 
-  if (keyboard.pressed('up') && aviao.rotation.x <= degreesToRadians(1)) {
+  const onGround = isOnGround();
+  const lift = hasLift();
+
+  if (!onGround && !lift) {
+    cameraHolder.translateZ(-STALL_SINK_RATE);
+  }
+
+  // Descending only makes sense in the air; climbing needs lift (taxi until the takeoff speed).
+  if (keyboard.pressed('up') && !onGround && aviao.rotation.x <= degreesToRadians(1)) {
     cameraHolder.translateZ(-angularSpeedVertical * mult);
     if (aviao.rotation.x >= degreesToRadians(-15)) {
       aviao.rotation.x -= animation * mult;
     }
   } else if (
     keyboard.pressed('down') &&
+    lift &&
     aviao.rotation.x >= degreesToRadians(-1)
   ) {
     cameraHolder.translateZ(angularSpeedVertical * mult);
@@ -540,17 +567,19 @@ function keyboardUpdate() {
     }
   }
 
-  if (keyboard.pressed('left') && aviao.rotation.y <= degreesToRadians(1)) {
+  // A stopped airplane cannot turn; on the ground it steers without banking (taxi).
+  if (keyboard.pressed('left') && movement && aviao.rotation.y <= degreesToRadians(1)) {
     cameraHolder.rotateZ(angularSpeedHorizontal * mult);
-    if (aviao.rotation.y >= degreesToRadians(-25)) {
+    if (!onGround && aviao.rotation.y >= degreesToRadians(-25)) {
       aviao.rotation.y -= animation * mult;
     }
   } else if (
     keyboard.pressed('right') &&
+    movement &&
     aviao.rotation.y >= degreesToRadians(-1)
   ) {
     cameraHolder.rotateZ(-angularSpeedHorizontal * mult);
-    if (aviao.rotation.y <= degreesToRadians(25)) {
+    if (!onGround && aviao.rotation.y <= degreesToRadians(25)) {
       aviao.rotation.y += animation * mult;
     }
   } else {
@@ -563,6 +592,7 @@ function keyboardUpdate() {
   }
 
   cameraHolder.position.z = THREE.MathUtils.clamp(cameraHolder.position.z, MIN_ALTITUDE, MAX_ALTITUDE);
+  updateSpeed();
 }
 
 /**
