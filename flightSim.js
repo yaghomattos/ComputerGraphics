@@ -159,22 +159,22 @@ audioLoader.load( './assets/endgame.mp3', function ( buffer ) {
  scene.add(light);
 
 var dirLight = new THREE.DirectionalLight();
-dirLight.position.copy(new THREE.Vector3(100, 200, 100));
+// Same direction as before, pushed far enough to cover the scene with a positive near plane.
+dirLight.position.copy(new THREE.Vector3(100, 200, 100).setLength(6000));
 dirLight.shadow.bias = 0.0001;
-dirLight.shadow.mapSize.width = 1024 * 30;
-dirLight.shadow.mapSize.height = 1024 * 30;
+dirLight.shadow.mapSize.width = 4096; // keep within MAX_TEXTURE_SIZE of common GPUs
+dirLight.shadow.mapSize.height = 4096;
 dirLight.shadow.camera.left = -3000;
 dirLight.shadow.camera.right = 3000;
 dirLight.shadow.camera.top = 3000;
 dirLight.shadow.camera.bottom = -3000;
 dirLight.castShadow = true;
-dirLight.shadow.camera.near = -6000;
-dirLight.shadow.camera.far = 6000;
+dirLight.shadow.camera.near = 1;
+dirLight.shadow.camera.far = 12000;
 scene.add(dirLight);
 
 var dynamicLight = new THREE.DirectionalLight();
 dynamicLight.intensity = 0.8; // No need to iluminate, just used to drop shadow.
-dynamicLight.position.set(-10, -20, 30);
 dynamicLight.shadow.mapSize.width = 1024;
 dynamicLight.shadow.mapSize.height = 1024;
 dynamicLight.castShadow = true;
@@ -182,17 +182,16 @@ dynamicLight.shadow.camera.left = -100;
 dynamicLight.shadow.camera.right = 100;
 dynamicLight.shadow.camera.top = 100;
 dynamicLight.shadow.camera.bottom = -100;
+dynamicLight.shadow.camera.near = 1;
+dynamicLight.shadow.camera.far = 1000;
+dynamicLight.shadow.camera.updateProjectionMatrix();
 
-function lightFollowTarget() 
-{
-  dynamicLight.shadow.camera.updateProjectionMatrix();     
-  
-  dynamicLight.target.position.set(
-    cameraHolder.position.x,
-    cameraHolder.position.y,
-    cameraHolder.position.z
-  );   
+/* Offset of the dynamic light from the plane; the light moves with it so its shadow frustum always contains it. */
+const dynamicLightOffset = new THREE.Vector3(-10, -20, 30).setLength(300);
 
+function lightFollowTarget() {
+  dynamicLight.position.copy(cameraHolder.position).add(dynamicLightOffset);
+  dynamicLight.target.position.copy(cameraHolder.position);
   dynamicLight.target.updateMatrixWorld();
 }
 
