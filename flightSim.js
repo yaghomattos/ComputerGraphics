@@ -131,8 +131,6 @@ window.addEventListener(
 
 // Sound Effects
 var playMusic = false;
-var playPlaneSound = false;
-var firstMove = true;
 
 var audioLoader = new THREE.AudioLoader();
 audioLoader.load( './assets/FlightSimulatorTheme.mp3', function( buffer ) {
@@ -491,6 +489,7 @@ Object.assign(crashBox.box.style, {
 function crash() {
   crashTimer = CRASH_RESPAWN_DELAY;
   crashBox.box.style.display = 'block';
+  if (sound1.isPlaying) sound1.pause();
 }
 
 function respawn() {
@@ -530,8 +529,18 @@ function updateFlight(dt) {
   cameraHolder.rotation.set(0, 0, flight.heading);
   aviao.rotation.set(flight.pitch, flight.bank, 0);
 
-  if (flight.throttle > 0) playPlaneSound = true;
+  updateEngineSound();
   updateSpeed();
+}
+
+/* The engine runs while the airplane has throttle or speed; louder and higher at more throttle. */
+function updateEngineSound() {
+  if (!sound1.buffer) return;
+  const running = crashTimer === 0 && (flight.throttle > 0 || flight.speed > 1);
+  if (running && !sound1.isPlaying) sound1.play();
+  if (!running && sound1.isPlaying) sound1.pause();
+  sound1.setVolume(0.1 + 0.3 * flight.throttle);
+  sound1.setPlaybackRate(0.7 + 0.6 * flight.throttle);
 }
 
 var modeCam2 = false;
@@ -641,12 +650,6 @@ function keyboardUpdate(dt) {
     sound.play();
     playMusic = false;
   }   
-
-  if(playPlaneSound && firstMove)     
-  {
-    sound1.play();
-    firstMove = false;
-  } 
 
   /* the HUD is hidden while inspecting the airplane */
   setHudVisible(!modeCam2);
