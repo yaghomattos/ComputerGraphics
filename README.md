@@ -37,6 +37,13 @@ Depois, acesse <http://localhost:8000/flightSim.html>, aguarde o carregamento e 
 
 O cronômetro começa ao cruzar o primeiro anel e para no último.
 
+### Decolagem e voo
+
+- O avião começa parado no solo. Acelere com `Q` e taxie até **20 km/h** para poder subir com `↓`.
+- No solo o avião só faz curvas em movimento, sem inclinar as asas.
+- Abaixo de 20 km/h não há sustentação: em voo, o avião perde altitude até pousar.
+- Perto do chão, a inclinação nas curvas e o mergulho são limitados para que asas e nariz não toquem o solo.
+
 ## Estrutura
 
 ```
