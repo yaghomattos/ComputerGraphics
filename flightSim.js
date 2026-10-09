@@ -16,6 +16,7 @@ import { generateTrack, createCheckpoints, CHECKPOINT_RADIUS } from './track.js'
 
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
+import { ConvexHull } from 'three/examples/jsm/math/ConvexHull.js';
 
 var stats = new Stats(); // To show FPS information
 var renderer = initRenderer(); // View function in util/utils
@@ -205,8 +206,10 @@ var groundPlane = createGroundPlane(40500, 40500, 1, 1, 'rgb(130,130,130)')
 groundPlane.receiveShadow = false;
 scene.add(groundPlane);
 
+const GROUND_SURFACE = 5; /* height of the city ground, where the airplane rolls */
+
 var cityPlane = createGroundPlane(4500, 4500, 1, 1, 'rgb(200,100,100)')
-cityPlane.translateZ(5);
+cityPlane.translateZ(GROUND_SURFACE);
 cityPlane.translateX(200);
 cityPlane.translateY(-700);
 scene.add(cityPlane);
@@ -449,6 +452,71 @@ function hasLift() {
   return currentSpeed() >= TAKEOFF_SPEED;
 }
 
+/**
+ * Ground clearance: pitch and bank are limited so no part of the airplane goes below the ground
+ * (e.g. a wingtip while turning at low altitude). The lowest point of the model, for any attitude,
+ * is one of the vertices of its convex hull, computed once when the model loads.
+ */
+var hullPoints = []; /* convex hull vertices, in aviao's local space */
+const attitude = new THREE.Euler();
+const attitudeQuaternion = new THREE.Quaternion();
+const hullPoint = new THREE.Vector3();
+
+function computeHullPoints(model) {
+  aviao.updateMatrixWorld(true);
+  const worldToAviao = aviao.matrixWorld.clone().invert();
+  const meshToAviao = new THREE.Matrix4();
+  const points = [];
+  model.traverse(function (child) {
+    if (!child.isMesh) return;
+    meshToAviao.multiplyMatrices(worldToAviao, child.matrixWorld);
+    const position = child.geometry.attributes.position;
+    for (let i = 0; i < position.count; i++) {
+      points.push(new THREE.Vector3().fromBufferAttribute(position, i).applyMatrix4(meshToAviao));
+    }
+  });
+  // ConvexHull.vertices keeps every input point; the hull itself is given by the faces.
+  const hull = new ConvexHull().setFromPoints(points);
+  const hullVertices = new Set();
+  for (const face of hull.faces) {
+    let edge = face.edge;
+    do {
+      hullVertices.add(edge.head().point);
+      edge = edge.next;
+    } while (edge !== face.edge);
+  }
+  hullPoints = [...hullVertices];
+}
+
+/* Height of the lowest point of the airplane above the ground, for the given pitch and bank. */
+function groundClearance(pitch, bank) {
+  attitudeQuaternion.setFromEuler(attitude.set(pitch, bank, aviao.rotation.z));
+  let lowest = Infinity;
+  for (const point of hullPoints) {
+    lowest = Math.min(lowest, hullPoint.copy(point).applyQuaternion(attitudeQuaternion).z);
+  }
+  // cameraHolder only rotates around Z, so local heights are world heights.
+  return cameraHolder.position.z + aviao.position.z + lowest - GROUND_SURFACE;
+}
+
+/* Levels the wings and the nose just enough to keep the airplane clear of the ground. */
+function keepClearOfGround() {
+  const pitch = aviao.rotation.x;
+  const bank = aviao.rotation.y;
+  if (groundClearance(pitch, bank) >= 0) return;
+
+  // Binary search for the largest fraction of the current attitude that still clears the ground.
+  let safe = 0;
+  let unsafe = 1;
+  for (let i = 0; i < 10; i++) {
+    const fraction = (safe + unsafe) / 2;
+    if (groundClearance(pitch * fraction, bank * fraction) >= 0) safe = fraction;
+    else unsafe = fraction;
+  }
+  aviao.rotation.x = pitch * safe;
+  aviao.rotation.y = bank * safe;
+}
+
 function restartRace() {
   cameraHolder.position.copy(startPosition);
   cameraHolder.rotation.set(0, 0, startHeading);
@@ -592,6 +660,7 @@ function keyboardUpdate() {
   }
 
   cameraHolder.position.z = THREE.MathUtils.clamp(cameraHolder.position.z, MIN_ALTITUDE, MAX_ALTITUDE);
+  keepClearOfGround();
   updateSpeed();
 }
 
@@ -677,6 +746,7 @@ function loadOBJFile(modelPath, modelName) {
         aviaoInspec.copy(aviao, true);
         obj.rotateX(Math.PI / 2);
         obj.rotateY(Math.PI / 2);
+        computeHullPoints(obj);
       }
     });
   });
