@@ -119,6 +119,9 @@ window.addEventListener(
   'resize',
   function () {
     onWindowResize(camera, renderer);
+    onWindowResize(inspecCamera, renderer);
+    onWindowResize(cameraLoading, renderer);
+    trackballControls.handleResize();
   },
   false
 );
@@ -260,7 +263,7 @@ var maxSpeedBox = new SecondaryBox('');
 maxSpeedBox.box.style.left = '225px';
 maxSpeedBox.box.style.display = 'none';
 
-var timeBox = new SecondaryBox('');
+var timeBox = new SecondaryBox(' Time: 0.00');
 timeBox.box.style.bottom = '50px';
 
 var checkBox = new SecondaryBox('');
@@ -283,15 +286,14 @@ function updateTime() {
 }
 
 /* message speed */
+maxSpeedBox.changeMessage('MAX');
+
+function isMaxSpeed() {
+  return Math.pow(mult, 2) > 41;
+}
+
 function updateSpeed() {
   speedBox.changeMessage('Speed: ' + Math.pow(mult, 2).toFixed(0) + ' km/h');
-  if (Math.pow(mult, 2) > 41) {
-    maxSpeedBox.changeMessage('MAX');
-    maxSpeedBox.box.style.display = 'block';
-  } else {
-    maxSpeedBox.changeMessage('');
-    maxSpeedBox.box.style.display = 'none';
-  }
 }
 
 /**
@@ -413,6 +415,8 @@ var started = false;
 
 var finished = false;
 
+updateSpeed();
+
 function keyboardUpdate() {
   keyboard.update();
 
@@ -432,7 +436,6 @@ function keyboardUpdate() {
   } 
 
   if (modeCam2) {
-    movement = false;
     /* invisible secondaryBox */
     speedBox.box.style.display = 'none';
     timeBox.box.style.display = 'none';
@@ -443,7 +446,7 @@ function keyboardUpdate() {
     /* visible secondaryBox */
     speedBox.box.style.display = 'block';
     timeBox.box.style.display = 'block';
-    maxSpeedBox.box.style.display = 'block';
+    maxSpeedBox.box.style.display = isMaxSpeed() ? 'block' : 'none';
     checkBox.box.style.display = 'block';
   }
 
@@ -457,11 +460,8 @@ function keyboardUpdate() {
   }
 
   if (keyboard.down('space')) {
-    mult = 0;
     sim = !sim;
     modeCam2 = !modeCam2;
-
-    if (!modeCam2) mult = 2;
   }
 
   if (keyboard.down('enter')) {
@@ -471,6 +471,9 @@ function keyboardUpdate() {
   if (keyboard.down('C')) {
     cockpit = !cockpit;
   }
+
+  // The airplane is paused while it is being inspected; speed is kept for when the flight resumes.
+  if (modeCam2) return;
 
   if (movement) {
     aviao.translateY(0);
