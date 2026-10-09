@@ -10,6 +10,7 @@ import {
   onWindowResize,
   degreesToRadians,
   createLightSphere,
+  mergeByMaterial,
 } from './lib/util.js';
 
 import { generateTrack, createCheckpoints, CHECKPOINT_RADIUS } from './track.js';
@@ -748,18 +749,23 @@ function loadOBJFile(modelPath, modelName) {
     objLoader.setMaterials(materials);
     objLoader.setPath(modelPath);
     objLoader.load(modelName + '.obj', function (obj) {
-      obj.name = modelName;
-      obj.traverse(function (child) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-        if (child.material) child.material.side = THREE.DoubleSide;
-      });
-
       if (modelName == 'cidade') {
         obj.rotateX(degreesToRadians(90));
         obj.translateZ(1000);
         obj.translateX(-200);
         obj.translateY(5);
+        // The city is static: ~1800 meshes become one per material (~80 draw calls).
+        obj = mergeByMaterial(obj);
+      }
+
+      obj.name = modelName;
+      obj.traverse(function (child) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        [].concat(child.material || []).forEach((material) => (material.side = THREE.DoubleSide));
+      });
+
+      if (modelName == 'cidade') {
         scene.add(obj);
         cityHeights = createHeightMap(collectTriangles(obj));
       }
