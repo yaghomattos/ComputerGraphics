@@ -460,6 +460,10 @@ function flightInput() {
   };
 }
 
+/* The airplane cannot leave the ground plane, which also keeps it inside the skybox. */
+const MAP_HALF_SIZE = 15000;
+const MAP_BOUNDS = { minX: -MAP_HALF_SIZE, maxX: MAP_HALF_SIZE, minY: -MAP_HALF_SIZE, maxY: MAP_HALF_SIZE };
+
 /* Height of the ground (or of whatever is below, like a building) at a point of the scene. */
 function groundHeightAt(x, y) {
   const ground = isInsideCity(x, y) ? GROUND_SURFACE : 0;
@@ -517,7 +521,7 @@ function updateFlight(dt) {
     crashTimer -= Math.min(dt, FLIGHT.MAX_FRAME_DT);
     if (crashTimer > 0) return;
     respawn();
-  } else if (stepFlight(flight, flightInput(), dt, groundHeightAt).crashed) {
+  } else if (stepFlight(flight, flightInput(), dt, groundHeightAt, MAP_BOUNDS).crashed) {
     crash();
   }
   keepClearOfGround();

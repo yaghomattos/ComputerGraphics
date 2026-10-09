@@ -5,10 +5,10 @@ import { FLIGHT, createFlightState, stepFlight } from '../flight.js';
 const flat = () => 0;
 const idle = { throttle: 0, pitch: 0, roll: 0 };
 
-function run(state, input, seconds, { dt = 1 / 60, ground = flat } = {}) {
+function run(state, input, seconds, { dt = 1 / 60, ground = flat, bounds } = {}) {
   const frames = Math.round(seconds / dt);
   for (let frame = 0; frame < frames; frame++) {
-    if (stepFlight(state, input, dt, ground).crashed) return true;
+    if (stepFlight(state, input, dt, ground, bounds).crashed) return true;
   }
   return false;
 }
@@ -106,4 +106,12 @@ test('flying into a wall is a crash, rolling over a curb is not', () => {
   const taxi = createFlightState({ speed: 40, throttle: 0.15 });
   assert.equal(run(taxi, idle, 2, { ground: curb }), false);
   assert.equal(taxi.z, 2);
+});
+
+test('the airplane cannot leave the map bounds', () => {
+  const s = airborne(250);
+  const bounds = { minX: -100, maxX: 100, minY: -100, maxY: 100 };
+  run(s, idle, 3, { bounds });
+  assert.equal(s.y, 100);
+  assert.ok(Math.abs(s.x) <= 100);
 });
