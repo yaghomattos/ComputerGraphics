@@ -273,14 +273,13 @@ initialMessage.box.style.bottom = '35%';
 
 var keyboard = new KeyboardState();
 
-/* timer */
-var timer = new THREE.Clock();
-var delta = 0;
+/* timer, started when the first checkpoint is crossed */
+var timer = new THREE.Clock(false);
+var elapsedTime = 0;
 
 function updateTime() {
-  if (latest) timer.stop();
-  delta += timer.getDelta();
-  timeBox.changeMessage(' Time: ' + delta.toFixed(2));
+  elapsedTime += timer.getDelta();
+  timeBox.changeMessage(' Time: ' + elapsedTime.toFixed(2));
 }
 
 /* message speed */
@@ -296,17 +295,63 @@ function updateSpeed() {
 }
 
 /**
- * Checkpoints update
+ * Checkpoints: they must be crossed in order, through the ring.
  */
-var checkpointsCount = 0;
+var nextCheckpoint = 0;
+var previousSide = null; // side of the next ring's plane the airplane was on in the last frame
+const airplaneLocal = new THREE.Vector3();
 
-function updateCheckedpoint(checkPointIndex) {
+function updateCheckpointBox() {
   checkBox.changeMessage(
-    'Checkpoint(s): ' + checkpointsCount + '/' + checkpoints.length
+    'Checkpoint(s): ' + nextCheckpoint + '/' + checkpoints.length
   );
-  if(checkPointIndex != 12)
-    sound2.play();
 }
+
+function highlightNextCheckpoint() {
+  checkpoints.forEach((ring, i) => {
+    ring.material.opacity = i === nextCheckpoint ? 0.9 : 0.3;
+  });
+}
+
+function updateCheckpoints() {
+  if (finished) return;
+
+  const ring = checkpoints[nextCheckpoint];
+  airplaneLocal.copy(cameraHolder.position);
+  ring.worldToLocal(airplaneLocal);
+
+  // The ring lies on its local XY plane: crossing it means local Z changed sign inside the radius.
+  const side = Math.sign(airplaneLocal.z);
+  const insideRing = Math.hypot(airplaneLocal.x, airplaneLocal.y) < getRadius();
+
+  if (previousSide !== null && side !== previousSide && insideRing) passCheckpoint(ring);
+  else previousSide = side;
+}
+
+function passCheckpoint(ring) {
+  ring.visible = false;
+  previousSide = null;
+
+  if (nextCheckpoint === 0) {
+    started = true;
+    timer.start();
+  }
+  nextCheckpoint++;
+  updateCheckpointBox();
+
+  if (nextCheckpoint === checkpoints.length) {
+    updateTime();
+    timer.stop();
+    finished = true;
+    sound3.play();
+  } else {
+    sound2.play();
+    highlightNextCheckpoint();
+  }
+}
+
+updateCheckpointBox();
+highlightNextCheckpoint();
 
 /**
  * Skybox
@@ -366,7 +411,7 @@ var animation = degreesToRadians(0.1587);
 var modeCam2 = false;
 var started = false;
 
-var latest = false;
+var finished = false;
 
 function keyboardUpdate() {
   keyboard.update();
@@ -402,49 +447,8 @@ function keyboardUpdate() {
     checkBox.box.style.display = 'block';
   }
 
-  var radiusCheckpoint = getRadius();
-
-  for (var i = 0; i < checkpoints.length; i++) {
-    var inicioX = checkpoints[i].position.x;
-    var inicioY = checkpoints[i].position.y;
-    var inicioZ = checkpoints[i].position.z;
-
-    var aviaoX = cameraHolder.position.x;
-    var aviaoY = cameraHolder.position.y;
-    var aviaoZ = cameraHolder.position.z;
-
-    if (
-      aviaoX > inicioX - radiusCheckpoint &&
-      aviaoX < inicioX + radiusCheckpoint &&
-      aviaoY > inicioY - radiusCheckpoint &&
-      aviaoY < inicioY + radiusCheckpoint &&
-      aviaoZ > inicioZ - radiusCheckpoint &&
-      aviaoZ < inicioZ + radiusCheckpoint
-    ) {
-      if (i == 0) {
-        started = true;
-        updateTime();
-        if (checkpoints[i].visible == true) {
-          checkpointsCount++;
-          updateCheckedpoint(i);
-        }
-        checkpoints[i].visible = false;
-      } else {
-        if (checkpoints[i].visible == true) {
-          checkpointsCount++;
-          updateCheckedpoint(i);
-        }
-        checkpoints[i].visible = false;
-      }
-    }
-    if (!checkpoints[12].visible && !latest) {
-      updateTime(stop);
-      sound3.play();
-      latest = true;
-    }
-  }
-
-  if (started) updateTime();
+  updateCheckpoints();
+  if (started && !finished) updateTime();
 
   if (keyboard.down('H')) {
     if (controls.infoBox.style.display === 'none')

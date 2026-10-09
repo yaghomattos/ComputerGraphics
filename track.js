@@ -36,8 +36,14 @@ function generateTorus(cor1, cor2, cor3) {
   return torus;
 }
 
+/* Track points use Y as height; the scene uses Z as height (see generateTrack's rotateX). */
+function toScene(v) {
+  return new THREE.Vector3(v.x, -v.z, v.y);
+}
+
 export function createCheckpoints() {
   var checkpoint = [];
+  const curve = new THREE.CatmullRomCurve3(curveTrackPoints);
 
   
   for (var i=1, j=0; i < curveTrackPoints.length - 1; i++, j++){   
@@ -53,16 +59,16 @@ export function createCheckpoints() {
       checkpoint[j].position.x = -846;
       checkpoint[j].position.y = -370;
       checkpoint[j].position.z = 50;
-      checkpoint[j].lookAt(-500, 407, 0);
-      checkpoint[j].rotateX(Math.PI/2);
     }
     else{
       checkpoint[j].position.x = curveTrackPoints[i].x;
       checkpoint[j].position.y = -curveTrackPoints[i].z;
       checkpoint[j].position.z = curveTrackPoints[i].y;
-      checkpoint[j].lookAt(checkpoint[j].position);
-      checkpoint[j].rotateX(Math.PI/2);
     }
+
+    // The torus axis (local Z) follows the track direction, so the ring faces the incoming plane.
+    const tangent = toScene(curve.getTangent(i / (curveTrackPoints.length - 1)));
+    checkpoint[j].lookAt(checkpoint[j].position.clone().add(tangent));
   }
   
   return checkpoint;
